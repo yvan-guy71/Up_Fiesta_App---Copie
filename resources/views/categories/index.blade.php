@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toutes les catégories - Up Fiesta</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700" rel="stylesheet" />
+    <style>
+        body { font-family: 'Instrument Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+    <!-- Header simple -->
+    <header class="bg-white border-b border-slate-100 py-6 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
+            <a href="/" class="flex items-center gap-2">
+                <img src="{{ asset('images/logo.png') }}" alt="Up Fiesta Logo" class="h-10 w-auto">
+            </a>
+            <a href="/" class="text-sm font-bold text-slate-600 hover:text-indigo-600 transition">Retour à l'accueil</a>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto py-16 px-4">
+        <div class="mb-12 text-center">
+            <h1 class="text-4xl font-black mb-4">Découvrez nos services</h1>
+            <p class="text-slate-500 text-lg">Trouvez le professionnel idéal pour tous vos besoins au Togo.</p>
+        </div>
+
+        <!-- Filtres par type -->
+        <div class="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-12">
+            <a href="{{ route('categories.index') }}"
+               class="px-4 sm:px-6 py-3 rounded-2xl font-bold transition text-center {{ !$kind ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'bg-white text-slate-600 border border-slate-100 hover:bg-slate-50' }}">
+                Toutes
+            </a>
+            <a href="{{ route('categories.index', ['kind' => 'prestations']) }}"
+               class="px-4 sm:px-6 py-3 rounded-2xl font-bold transition text-center {{ $kind === 'prestations' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'bg-white text-slate-600 border border-slate-100 hover:bg-slate-50' }}">
+                <span class="hidden sm:inline">Prestations (Événementiel)</span>
+                <span class="sm:hidden">Événementiel</span>
+            </a>
+            <a href="{{ route('categories.index', ['kind' => 'domestiques']) }}"
+               class="px-4 sm:px-6 py-3 rounded-2xl font-bold transition text-center {{ $kind === 'domestiques' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'bg-white text-slate-600 border border-slate-100 hover:bg-slate-50' }}">
+                <span class="hidden sm:inline">Services Domestiques</span>
+                <span class="sm:hidden">Domestiques</span>
+            </a>
+        </div>
+
+        <!-- Grille des catégories avec prestataires -->
+        <div class="space-y-24">
+            @foreach($categories as $category)
+                @php
+                    $categoryImages = [
+                        'traiteur' => 'images/categories/perto.jpg',
+                        'decoration' => 'images/categories/deco.png',
+                        'photographie-video' => 'images/categories/photo.jpg',
+                        'animation-dj' => 'images/categories/DJ.jpg',
+                        'location-salle' => 'images/categories/location.webp',
+                        'securite' => 'images/categories/secure.jpeg',
+                        'maquillage-coiffure' => 'images/categories/coiffure.jpg',
+                        'location-voiture' => 'images/categories/voiture.jpeg',
+                        'hotesse-accueil' => 'images/categories/hotesse.jpg',
+                        'maconnerie' => 'images/categories/macon.webp',
+                        'menuiserie' => 'images/categories/menuisier.jpg',
+                        'cuisinier-domicile' => 'images/categories/cuisinier.webp',
+                        'plomberie' => 'images/categories/plombier.jpg',
+                        'electricite' => 'images/categories/electricien.webp',
+                        'peinture' => 'images/categories/peintre.jpg',
+                        'climatisation' => 'images/categories/clim.jpg',
+                        'entretien-nettoyage' => 'images/categories/nettoyage.webp',
+                        'mecanique' => 'images/categories/mecanique.jpeg',
+                        'transport-logistique' => 'images/categories/transport.jpeg',
+                    ];
+                    $imagePath = $categoryImages[$category->slug] ?? 'images/categories/default.jpg';
+                @endphp
+                <div id="category-{{ $category->id }}" class="scroll-mt-24">
+                    <div class="relative h-48 md:h-64 rounded-3xl overflow-hidden mb-8 shadow-lg">
+                        <img src="{{ asset($imagePath) }}" alt="{{ $category->name }}" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent flex items-center">
+                            <div class="px-8 md:px-12">
+                                <span class="inline-block px-3 py-1 bg-indigo-600 text-white text-xs font-bold rounded-full mb-3 uppercase tracking-widest">
+                                    {{ $category->kind === 'prestations' ? 'Événementiel' : 'Service Domestique' }}
+                                </span>
+                                <h2 class="text-3xl md:text-4xl font-black text-white mb-2">{{ $category->name }}</h2>
+                                <p class="text-indigo-100 font-medium">{{ $category->providers_count }} professionnel(s) disponible(s)</p>
+                            </div>
+                        </div>
+                        <a href="{{ route('categories.show', $category->id) }}" class="absolute top-6 right-6 bg-white/20 backdrop-blur-md hover:bg-white/40 text-white px-5 py-2 rounded-xl text-sm font-bold transition-all border border-white/30">
+                            Voir la fiche catégorie
+                        </a>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        @forelse($category->providers as $provider)
+                            @include('partials.provider-card', ['provider' => $provider])
+                        @empty
+                            <div class="col-span-full py-8 text-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-100">
+                                <p class="text-slate-400 font-medium">Aucun professionnel disponible pour le moment dans cette catégorie.</p>
+                                <a href="{{ route('service-requests.create') }}" class="inline-block mt-4 text-sm font-bold text-indigo-600 hover:underline">
+                                    Exprimer un besoin spécifique →
+                                </a>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </main>
+
+    <footer class="bg-white border-t border-slate-100 py-12 px-4 mt-20 text-center">
+        <p class="text-slate-400 text-sm font-medium">&copy; 2026 Up Fiesta. Tous droits réservés.</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<?php
+
+return [
+    'nav' => [
+        'find_provider' => 'Trouver un service',
+        'categories' => 'Services',
+        'featured' => 'À la une',
+        'pro_space' => 'Espace Pro',
+        'login' => 'Se connecter',
+        'register' => 'Créer un compte',
+        'logout' => 'Se déconnecter',
+        'messages' => 'Messages',
+        'bookings' => 'Réservations',
+        'language' => 'Langue',
+        'dark_mode' => 'Mode sombre',
+    ],
+    'home' => [
+        'hero_title' => 'Tous vos besoins d\'événements et services en un clic',
+        'hero_subtitle' => 'La plateforme qui réunit les meilleurs prestataires d\'événements et les professionnels du quotidien (Prestataires, menuisiers, Cuisiniers etc.).',
+        'search_placeholder' => 'Que recherchez-vous ? (Traiteur, Maçon, DJ...)',
+        'search_button' => 'Rechercher',
+        'search_popular' => 'Populaire :',
+        'featured_title' => 'Professionnels à la une',
+        'featured_more' => 'Voir plus',
+        'featured_empty' => 'Aucun professionnel disponible pour le moment.',
+    ],
+    'footer' => [
+        'description' => 'La plateforme n°1 au Togo pour trouver et réserver les meilleurs professionnels. Événements ou services du quotidien, nous avons ce qu\'il vous faut.',
+        'quick_nav' => 'Navigation Rapide',
+        'home' => 'Accueil',
+        'categories' => 'Nos Services',
+        'pro_space' => 'Espace Professionnel',
+        'become_provider' => 'Devenir Professionnel',
+        'provider_login' => 'Connexion Pro',
+        'contact' => 'Contact',
+    ],
+    'cta' => [
+        'express_need' => 'Exprimer un besoin',
+        'create_event' => 'Créer un événement',
+        'pro_title' => 'Vous êtes un professionnel ?',
+        'pro_subtitle' => "Rejoignez Up Fiesta et boostez votre visibilité, que vous soyez dans l'événementiel ou un métier de service.",
+        'pro_signup' => 'Inscrivez-vous',
+    ],
+    'categories' => [
+        'browse_title' => 'Parcourir par catégorie',
+        'view_all' => 'Voir tout',
+        'kind_prestations' => 'Prestations',
+        'kind_domestiques' => 'Domestiques',
+    ],
+    'filters' => [
+        'all' => 'Tous',
+    ],
+    'search' => [
+        'results' => 'Résultats de recherche',
+        'count' => ':count prestataire(s) trouvé(s)',
+        'no_results' => 'Aucun résultat trouvé',
+        'reset' => 'Réinitialiser la recherche',
+    ],
+];
