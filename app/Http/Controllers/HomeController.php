@@ -7,6 +7,7 @@ use App\Models\City;
 use App\Models\Provider;
 use App\Models\ServiceCategory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class HomeController extends Controller
 {
@@ -46,63 +47,100 @@ class HomeController extends Controller
         $cities = \Illuminate\Support\Facades\Cache::remember('all_cities', 3600, function() {
             return City::all();
         });
-        
-        $query = Provider::query()->with(['categories', 'category', 'city']);
 
-        if ($request->filled('q')) {
-            $query->where(function($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->q . '%')
-                  ->orWhere('description', 'like', '%' . $request->q . '%')
-                  ->orWhereHas('categories', function($sq) use ($request) {
-                      $sq->where('name', 'like', '%' . $request->q . '%');
-                  });
-            });
-        }
-
-        if ($request->filled('kind')) {
-            $kind = $request->kind;
-            if (in_array($kind, [\App\Models\ServiceCategory::KIND_PRESTATIONS, \App\Models\ServiceCategory::KIND_DOMESTIQUES], true)) {
-                $query->where(function($q) use ($kind) {
-                    $q->whereHas('category', function ($sq) use ($kind) {
-                        $sq->where('kind', $kind);
-                    })->orWhereHas('categories', function ($sq) use ($kind) {
-                        $sq->where('kind', $kind);
-                    });
-                });
-            }
-        }
-
-        if ($request->filled('category')) {
-            $categoryId = $request->category;
-            $query->where(function($q) use ($categoryId) {
-                $q->where('category_id', $categoryId)
-                  ->orWhereHas('categories', function ($sq) use ($categoryId) {
-                      $sq->where('service_categories.id', $categoryId);
-                  });
-            });
-        }
-
-        if ($request->filled('city')) {
-            $query->where('city_id', $request->city);
-        }
-
-        if ($request->filled('min_price')) {
-            $query->where('base_price', '>=', $request->min_price);
-        }
-
-        if ($request->filled('max_price')) {
-            $query->where('base_price', '<=', $request->max_price);
-        }
-
-        // Optimisation : eager load only necessary relations and paginate
-        $providers = $query->latest()->paginate(50)->withQueryString();
-        
         // Mise en cache des prestataires à la une
         $featuredProviders = \Illuminate\Support\Facades\Cache::remember('featured_providers_home_v2', 1800, function() {
             return Provider::with(['category', 'city'])->where('is_verified', true)->latest()->take(15)->get();
         });
         
-        return view('welcome', compact('searchCategories', 'homeCategories', 'cities', 'providers', 'featuredProviders'));
+        return view('welcome', [
+            'searchCategories' => $searchCategories,
+            'categories' => $searchCategories,  // Alias pour compatibilité avec la vue
+            'homeCategories' => $homeCategories,
+            'cities' => $cities,
+            'featuredProviders' => $featuredProviders
+        ]);
+    }
+
+    public function search(Request $request)
+    {
+        try {
+            // Get categories and cities without heavy caching
+            $searchCategories = ServiceCategory::orderBy('name')->get();
+            $cities = City::all();
+            
+            // Start with base query
+            $query = Provider::query();
+
+            // Search by keyword
+            if ($request->filled('q')) {
+                $searchTerm = '%' . $request->q . '%';
+                $query->where(function($q) use ($searchTerm) {
+                    $q->where('name', 'like', $searchTerm)
+                      ->orWhere('description', 'like', $searchTerm);
+                });
+            }
+
+            // Filter by kind
+            if ($request->filled('kind')) {
+                $kind = $request->kind;
+                if (in_array($kind, ['prestations', 'domestiques'], true)) {
+                    $query->whereHas('category', function ($sq) use ($kind) {
+                        $sq->where('kind', '=', $kind);
+                    });
+                }
+            }
+
+            // Filter by category
+            if ($request->filled('category')) {
+                $categoryId = (int)$request->category;
+                $query->where('category_id', '=', $categoryId);
+            }
+
+            // Filter by city
+            if ($request->filled('city')) {
+                $query->where('city_id', '=', (int)$request->city);
+            }
+
+            // Get the total count before pagination
+            $totalResults = $query->count();
+            
+            // Load relations, order and paginate
+            $providers = $query->with(['category', 'city'])->orderBy('created_at', 'desc')->paginate(12)->withQueryString();
+            
+            // Get selected filter values for display
+            $selectedCategory = null;
+            $selectedCity = null;
+            
+            if ($request->filled('category')) {
+                $selectedCategory = $searchCategories->firstWhere('id', (int) $request->category);
+            }
+            
+            if ($request->filled('city')) {
+                $selectedCity = $cities->firstWhere('id', (int) $request->city);
+            }
+
+            return view('search', [
+                'providers' => $providers,
+                'searchCategories' => $searchCategories,
+                'cities' => $cities,
+                'totalResults' => $totalResults,
+                'selectedCategory' => $selectedCategory,
+                'selectedCity' => $selectedCity
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Search error: ' . $e->getMessage() . ' ' . $e->getTraceAsString());
+            
+            return view('search', [
+                'providers' => collect(),
+                'searchCategories' => ServiceCategory::orderBy('name')->get() ?? collect(),
+                'cities' => City::all() ?? collect(),
+                'totalResults' => 0,
+                'selectedCategory' => null,
+                'selectedCity' => null
+            ]);
+        }
     }
 
     public function showProvider(Provider $provider)

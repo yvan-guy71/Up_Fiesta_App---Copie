@@ -1,29 +1,50 @@
 <!DOCTYPE html>
-<html lang="{{ app()->getLocale() }}">
+<html lang="{{ app()->getLocale() }}" class="">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ __('contact.title') }} - Up Fiesta</title>
+    
+    <!-- Favicon -->
+    <link rel="apple-touch-icon" href="/favicon-192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+    
+    <script>
+        tailwind.config = { darkMode: 'class' };
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        html { scroll-behavior: smooth; }
+        html.dark body { background-color: #020617; color: #e5e7eb; }
+        html.dark header { background-color: #1a1f2e; border-color: #2d3748; }
+        html.dark main { background-color: #020617; }
+        html.dark .bg-white { background-color: #1a1f2e; border-color: #2d3748; }
+        html.dark .bg-slate-50 { background-color: #111827; }
+        html.dark .text-slate-500, html.dark .text-slate-600, html.dark .text-slate-700, html.dark .text-slate-900 { color: #e5e7eb; }
+        html.dark input, html.dark textarea { background-color: #111827; color: #e5e7eb; }
+        html.dark input::placeholder, html.dark textarea::placeholder { color: #6b7280; }
+        html.dark input:focus, html.dark textarea:focus { background-color: #1a1f2e; }
+        html.dark footer { background-color: #1a1f2e; border-color: #2d3748; }
+        html.dark .bg-emerald-50 { background-color: #064e3b; }
+        html.dark .text-emerald-600 { color: #6ee7b7; }
+        html.dark .border-emerald-100 { border-color: #10b981; }
+        * { transition-property: background-color, border-color, color; transition-duration: 200ms; }
+    </style>
 </head>
 <body class="bg-slate-50 font-sans text-slate-900">
     <!-- Header/Nav simplified -->
-    <header class="bg-white border-b border-slate-100 py-4 px-4 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <a href="/" class="flex items-center gap-2">
-                <img src="{{ asset('images/logo.png') }}" alt="Up Fiesta Logo" class="h-10 w-auto">
-            </a>
-            <a href="/" class="text-slate-600 hover:text-indigo-600 font-bold transition">{{ __('contact.back_home') }}</a>
-        </div>
-    </header>
+    @include('partials.header')
 
-    <main class="max-w-4xl mx-auto py-16 px-4">
+    <main class="max-w-4xl mx-auto py-16 px-4 dark:bg-slate-900 dark:text-white">
         <div class="text-center mb-12">
-            <h1 class="text-4xl font-black text-slate-900 mb-4">{{ __('contact.title') }}</h1>
-            <p class="text-slate-500 text-lg">{{ __('contact.subtitle') }}</p>
+            <h1 class="text-4xl font-black text-slate-900 dark:text-white mb-4">{{ __('contact.title') }}</h1>
+            <p class="text-slate-500 dark:text-slate-400 text-lg">{{ __('contact.subtitle') }}</p>
         </div>
 
-        <div class="bg-white rounded-3xl shadow-xl shadow-slate-200 border border-slate-100 overflow-hidden grid md:grid-cols-5">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-xl dark:shadow-2xl shadow-slate-200 dark:shadow-slate-900 border border-slate-100 dark:border-slate-700 overflow-hidden grid md:grid-cols-5">
             <!-- Contact Info Sidebar -->
             <div class="md:col-span-2 bg-indigo-600 p-10 text-white">
                 <h3 class="text-2xl font-bold mb-8">{{ __('contact.info_title') }}</h3>
@@ -88,7 +109,7 @@
             <!-- Form -->
             <div class="md:col-span-3 p-10">
                 @if(session('success'))
-                    <div class="bg-emerald-50 border border-emerald-100 text-emerald-600 px-6 py-4 rounded-2xl mb-8 flex items-center gap-3">
+                    <div class="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-500/50 text-emerald-600 dark:text-emerald-300 px-6 py-4 rounded-2xl mb-8 flex items-center gap-3">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
@@ -100,24 +121,24 @@
                     @csrf
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label for="name" class="block text-sm font-bold text-slate-700 mb-2">{{ __('contact.form_name') }}</label>
-                            <input type="text" id="name" name="name" required value="{{ old('name') }}" class="w-full px-5 py-4 rounded-2xl bg-slate-50 border-none focus:ring-2 focus:ring-indigo-500 outline-none transition" placeholder="Yves KODJO">
+                            <label for="name" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">{{ __('contact.form_name') }}</label>
+                            <input type="text" id="name" name="name" required value="{{ old('name') }}" class="w-full px-5 py-4 rounded-2xl bg-slate-50 dark:bg-slate-700 border-none dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition" placeholder="Yves KODJO">
                             @error('name') <p class="text-rose-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
                         <div>
-                            <label for="email" class="block text-sm font-bold text-slate-700 mb-2">{{ __('contact.form_email') }}</label>
-                            <input type="email" id="email" name="email" required value="{{ old('email') }}" class="w-full px-5 py-4 rounded-2xl bg-slate-50 border-none focus:ring-2 focus:ring-indigo-500 outline-none transition" placeholder="email@example.com">
+                            <label for="email" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">{{ __('contact.form_email') }}</label>
+                            <input type="email" id="email" name="email" required value="{{ old('email') }}" class="w-full px-5 py-4 rounded-2xl bg-slate-50 dark:bg-slate-700 border-none dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition" placeholder="email@example.com">
                             @error('email') <p class="text-rose-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
                     </div>
                     <div>
-                            <label for="subject" class="block text-sm font-bold text-slate-700 mb-2">{{ __('contact.form_subject') }}</label>
-                        <input type="text" id="subject" name="subject" required value="{{ old('subject') }}" class="w-full px-5 py-4 rounded-2xl bg-slate-50 border-none focus:ring-2 focus:ring-indigo-500 outline-none transition" placeholder="{{ __('contact.form_subject_placeholder') }}">
+                        <label for="subject" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">{{ __('contact.form_subject') }}</label>
+                        <input type="text" id="subject" name="subject" required value="{{ old('subject') }}" class="w-full px-5 py-4 rounded-2xl bg-slate-50 dark:bg-slate-700 border-none dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition" placeholder="{{ __('contact.form_subject_placeholder') }}">
                         @error('subject') <p class="text-rose-500 text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                            <label for="message" class="block text-sm font-bold text-slate-700 mb-2">{{ __('contact.form_message') }}</label>
-                        <textarea id="message" name="message" required rows="5" class="w-full px-5 py-4 rounded-2xl bg-slate-50 border-none focus:ring-2 focus:ring-indigo-500 outline-none transition" placeholder="{{ __('contact.form_message_placeholder') }}">{{ old('message') }}</textarea>
+                        <label for="message" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">{{ __('contact.form_message') }}</label>
+                        <textarea id="message" name="message" required rows="5" class="w-full px-5 py-4 rounded-2xl bg-slate-50 dark:bg-slate-700 border-none dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition" placeholder="{{ __('contact.form_message_placeholder') }}">{{ old('message') }}</textarea>
                         @error('message') <p class="text-rose-500 text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
                     <button type="submit" class="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl hover:bg-indigo-700 transition shadow-lg shadow-indigo-100 flex items-center justify-center gap-2 group">
@@ -131,10 +152,31 @@
         </div>
     </main>
 
-    <footer class="bg-white border-t border-slate-100 py-12 px-4 mt-16">
-        <div class="max-w-7xl mx-auto text-center">
-            <p class="text-slate-500 text-sm">{{ __('contact.copyright', ['year' => date('Y')]) }}</p>
-        </div>
-    </footer>
+    <!-- Footer -->
+    @include('partials.footer')
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const stored = localStorage.getItem('theme');
+            const root = document.documentElement;
+
+            function applyTheme(mode) {
+                if (mode === 'dark') {
+                    root.classList.add('dark');
+                } else {
+                    root.classList.remove('dark');
+                }
+            }
+
+            applyTheme(stored === 'dark' ? 'dark' : 'light');
+
+            window.toggleTheme = function() {
+                const current = root.classList.contains('dark') ? 'dark' : 'light';
+                const next = current === 'dark' ? 'light' : 'dark';
+                localStorage.setItem('theme', next);
+                applyTheme(next);
+            };
+        });
+    </script>
 </body>
 </html>

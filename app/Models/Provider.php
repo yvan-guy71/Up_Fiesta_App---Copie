@@ -23,6 +23,7 @@ class Provider extends Model
         'base_price',
         'price_range_max',
         'cni_number',
+        'years_of_experience',
         'cni_photo_front',
         'cni_photo_back',
         'is_company',

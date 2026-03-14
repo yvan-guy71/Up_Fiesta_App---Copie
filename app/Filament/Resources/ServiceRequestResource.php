@@ -33,8 +33,7 @@ class ServiceRequestResource extends Resource
                             ->relationship('user', 'name', fn ($query) => $query->where('role', 'client'))
                             ->required()
                             ->searchable()
-                            ->label('Client')
-                            ->default(auth()->id()),
+                            ->label('Client'),
                         Forms\Components\Select::make('provider_id')
                             ->relationship('provider', 'name')
                             ->searchable()

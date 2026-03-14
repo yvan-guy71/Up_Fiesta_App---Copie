@@ -6,6 +6,7 @@ use App\Models\Provider;
 use App\Models\User;
 use App\Models\Event as EventModel;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ServiceRequest extends Model
 {
@@ -45,5 +46,10 @@ class ServiceRequest extends Model
     public function event()
     {
         return $this->belongsTo(EventModel::class);
+    }
+
+    public function assignedServices(): HasMany
+    {
+        return $this->hasMany(AssignedService::class);
     }
 }

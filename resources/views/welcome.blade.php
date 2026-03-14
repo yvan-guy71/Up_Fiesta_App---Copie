@@ -453,7 +453,7 @@
                         }
                     }
                 @endphp
-                <form action="{{ route('home') }}" method="GET" id="search-form" class="bg-white/10 backdrop-blur-2xl p-4 rounded-3xl shadow-2xl flex flex-col lg:flex-row gap-4 max-w-5xl mx-auto transition-all duration-500 border border-white/20 hover:border-white/40">
+                <form action="{{ route('search') }}" method="GET" id="search-form" class="bg-white/10 backdrop-blur-2xl p-4 rounded-3xl shadow-2xl flex flex-col lg:flex-row gap-4 max-w-5xl mx-auto transition-all duration-500 border border-white/20 hover:border-white/40">
                     <div class="flex-1 flex items-center bg-white/10 px-6 py-3 rounded-2xl border-2 border-transparent transition-all group focus-within:bg-white/20 focus-within:border-white/60 focus-within:ring-4 focus-within:ring-white/10" id="search-input-container">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white mr-3 group-focus-within:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -500,7 +500,7 @@
                 <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
                     <span class="text-indigo-100/80 text-sm font-bold uppercase tracking-wider mr-2">{{ __('messages.home.search_popular') }}</span>
                     @php
-                        $suggestions = ['Traiteur', 'Baby-Sitters', 'Menuisier', 'DJ', 'Plombier', 'Photographe'];
+                        $suggestions = ['Traiteur', 'Menuisier', 'DJ', 'Plombier', 'Photographe'];
                     @endphp
                     @foreach($suggestions as $suggestion)
                         <button type="button" onclick="setSearchValue('{{ $suggestion }}')" class="bg-white/10 backdrop-blur-md border border-white/20 text-white px-4 py-1.5 rounded-full text-sm font-bold hover:bg-white hover:text-indigo-600 transition-all hover:-translate-y-1 shadow-sm">
@@ -510,69 +510,6 @@
                 </div>
             </div>
         </section>
-
-        <!-- Search Results or All Providers -->
-        <section class="max-w-7xl mx-auto py-20 px-4" id="results">
-            @if(request()->anyFilled(['q', 'category', 'city', 'kind']))
-            <div class="flex flex-col md:flex-row items-center justify-between mb-12 gap-6">
-                @php
-                    $selectedCategoryName = '';
-                    if (request()->filled('category')) {
-                        $cat = $searchCategories->firstWhere('id', (int) request('category'));
-                        $selectedCategoryName = $cat ? $cat->name : '';
-                    }
-                    $kind = request('kind');
-                @endphp
-                <div>
-                    <h2 class="text-3xl font-bold">
-                        @if($selectedCategoryName)
-                            {{ $selectedCategoryName }}
-                        @else
-                            {{ __('messages.search.results') }}
-                        @endif
-                    </h2>
-                    <p class="text-slate-500 mt-1">{{ __('messages.search.count', ['count' => $providers->total()]) }}</p>
-                </div>
-
-                <!-- Quick Kind Filters matching category index style -->
-                <div class="flex gap-3 bg-white p-1.5 rounded-2xl border border-slate-100 shadow-sm">
-                    <a href="{{ route('home', request()->except(['kind', 'category'])) }}#results" 
-                       class="px-5 py-2 rounded-xl text-sm font-bold transition {{ !$kind ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-600 hover:bg-slate-50' }}">
-                        {{ __('messages.filters.all') }}
-                    </a>
-                    <a href="{{ route('home', array_merge(request()->all(), ['kind' => \App\Models\ServiceCategory::KIND_PRESTATIONS])) }}#results" 
-                       class="px-5 py-2 rounded-xl text-sm font-bold transition {{ $kind === \App\Models\ServiceCategory::KIND_PRESTATIONS ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-600 hover:bg-slate-50' }}">
-                        {{ __('messages.categories.kind_prestations') }}
-                    </a>
-                    <a href="{{ route('home', array_merge(request()->all(), ['kind' => \App\Models\ServiceCategory::KIND_DOMESTIQUES])) }}#results" 
-                       class="px-5 py-2 rounded-xl text-sm font-bold transition {{ $kind === \App\Models\ServiceCategory::KIND_DOMESTIQUES ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-600 hover:bg-slate-50' }}">
-                        {{ __('messages.categories.kind_domestiques') }}
-                    </a>
-                </div>
-            </div>
-            @if($providers->count() > 0)
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                @foreach($providers as $provider)
-                    @include('partials.provider-card', ['provider' => $provider])
-                @endforeach
-            </div>
-            <div class="mt-12">
-                {{ $providers->links() }}
-            </div>
-            @else
-            <div class="text-center py-20 bg-white rounded-3xl shadow-sm">
-                <div class="w-20 h-20 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 9.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
-                <h3 class="text-xl font-bold text-slate-900 mb-2">{{ __('messages.search.no_results') }}</h3>
-                <p class="text-slate-500">Essayez d'ajuster vos filtres ou vos mots-clés.</p>
-                <a href="{{ route('home') }}" class="mt-6 inline-block text-indigo-600 font-semibold hover:underline">{{ __('messages.search.reset') }}</a>
-            </div>
-            @endif
-        </section>
-        @endif
 
         <!-- Categories section starts here -->
         <section id="categories" class="max-w-7xl mx-auto py-20 px-4 scroll-mt-20">

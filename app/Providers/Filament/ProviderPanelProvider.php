@@ -6,8 +6,6 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Events\Auth\Logout;
-use Illuminate\Support\Facades\Event;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -44,6 +42,7 @@ class ProviderPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Provider/Widgets'), for: 'App\\Filament\\Provider\\Widgets')
             ->widgets([
                 Widgets\AccountWidget::class,
+                \App\Filament\Provider\Widgets\AssignmentsStats::class,
                 \App\Filament\Provider\Widgets\AccountStatusWidget::class,
                 \App\Filament\Provider\Widgets\StatsOverview::class,
             ])

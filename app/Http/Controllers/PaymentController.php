@@ -25,11 +25,11 @@ class PaymentController extends Controller
 
     public function callback(Request $request, Booking $booking)
     {
-        if ($request->status === 'success') {
+        if ($request->input('status') === 'success') {
             $booking->update([
                 'payment_status' => 'pending',
-                'transaction_id' => $request->txn ?? $request->transaction,
-                'payment_method' => $request->method,
+                'transaction_id' => $request->input('txn') ?? $request->input('transaction'),
+                'payment_method' => $request->input('method'),
             ]);
 
             return redirect()->route('bookings.index')->with('success', 'Paiement initié. En cours de validation par PayGate (quelques minutes).');
@@ -42,6 +42,7 @@ class PaymentController extends Controller
     {
         $signature = $request->header('X-Paygate-Signature');
         $expected = env('PAYGATE_WEBHOOK_TOKEN');
+        
         if ($expected && $signature !== $expected) {
             return response()->json(['error' => 'Signature invalide'], 401);
         }
@@ -50,6 +51,7 @@ class PaymentController extends Controller
         $bookingId = $request->input('booking_id');
         $reference = $request->input('reference');
 
+        // Extract booking ID from reference if not provided
         if (!$bookingId && $reference && str_starts_with($reference, 'UPF-')) {
             $parts = explode('-', $reference);
             $bookingId = $parts[1] ?? null;

@@ -3,7 +3,6 @@
 namespace App\Filament\Provider\Resources;
 
 use App\Models\Provider;
-use App\Models\ProviderMedia;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -73,6 +72,7 @@ class ProviderResource extends Resource
                         Forms\Components\FileUpload::make('logo')
                             ->label('Logo ou Photo de couverture')
                             ->image()
+                            ->disk('public')
                             ->directory('providers-logos'),
                         Forms\Components\Grid::make(2)
                             ->schema([
@@ -91,16 +91,22 @@ class ProviderResource extends Resource
                     ->description('Ces documents ont été fournis lors de votre inscription.')
                     ->schema([
                         Forms\Components\TextInput::make('cni_number')
-                            ->label('Numéro CNI / Passeport')
+                            ->label('Numéro CNI')
+                            ->disabled(),
+                        Forms\Components\TextInput::make('years_of_experience')
+                            ->label('Années d\'expérience')
+                            ->numeric()
                             ->disabled(),
                         Forms\Components\FileUpload::make('cni_photo_front')
-                            ->label('CNI / Passeport (Recto)')
+                            ->label('CNI (Recto)')
                             ->image()
+                            ->disk('public')
                             ->directory('verification/cni')
                             ->disabled(),
                         Forms\Components\FileUpload::make('cni_photo_back')
-                            ->label('CNI / Passeport (Verso)')
+                            ->label('CNI (Verso)')
                             ->image()
+                            ->disk('public')
                             ->directory('verification/cni')
                             ->disabled(),
                         Forms\Components\TextInput::make('company_registration_number')
@@ -109,11 +115,13 @@ class ProviderResource extends Resource
                             ->disabled(),
                         Forms\Components\FileUpload::make('company_proof_doc_front')
                             ->label('Preuve d\'enregistrement (Recto / Page 1)')
+                            ->disk('public')
                             ->directory('verification/company')
                             ->visible(fn (Provider $record) => $record->is_company)
                             ->disabled(),
                         Forms\Components\FileUpload::make('company_proof_doc_back')
                             ->label('Preuve d\'enregistrement (Verso / Page 2)')
+                            ->disk('public')
                             ->directory('verification/company')
                             ->visible(fn (Provider $record) => $record->is_company)
                             ->disabled(),
@@ -136,6 +144,7 @@ class ProviderResource extends Resource
                                 Forms\Components\FileUpload::make('file_path')
                                     ->label('Fichier Image')
                                     ->image()
+                                    ->disk('public')
                                     ->directory('providers-gallery')
                                     ->required()
                                     ->visible(fn (callable $get) => $get('type') === 'image'),
@@ -187,7 +196,7 @@ class ProviderResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->where('user_id', auth()->id());
+        return parent::getEloquentQuery()->where('user_id', \Illuminate\Support\Facades\Auth::user()?->id);
     }
 
     public static function getPages(): array

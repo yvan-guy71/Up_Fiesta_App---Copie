@@ -109,7 +109,7 @@ class ServiceRequestController extends Controller
                 'budget' => $validated['budget'] ?? null,
             ]);
 
-            // notifications: client and admin
+            // notifications: ONLY client and admin (not provider until admin assigns it)
             $serviceRequest->user->notify(new ServiceRequestCreatedNotification($serviceRequest));
 
             $admins = User::where('role', 'admin')->get();
@@ -117,13 +117,7 @@ class ServiceRequestController extends Controller
                 Notification::send($admins, new ServiceRequestCreatedNotification($serviceRequest, true));
             }
 
-            // also notify specific provider when one was chosen
-            if ($providerId) {
-                $provider = Provider::find($providerId);
-                if ($provider && $provider->user) {
-                    $provider->user->notify(new ServiceRequestCreatedNotification($serviceRequest));
-                }
-            }
+            // Provider will be notified only when admin assigns the service to them
 
             $message = $type === 'event'
                 ? "Votre demande d'événement a bien été envoyée. Up-Fiesta se charge de tout, nous contactons les prestataires pour vous."

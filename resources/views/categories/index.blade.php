@@ -1,46 +1,65 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Toutes les catégories - Up Fiesta</title>
+    
+    <!-- Favicon -->
+    <link rel="apple-touch-icon" href="/favicon-192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+    
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' };
+    </script>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700" rel="stylesheet" />
     <style>
         body { font-family: 'Instrument Sans', sans-serif; }
+        html.dark body { background-color: #020617; color: #e5e7eb; }
+        html.dark .bg-white { background-color: #1a1f2e; }
+        html.dark .bg-slate-50 { background-color: #1e293b; }
+        html.dark .border-slate-100 { border-color: #334155; }
+        html.dark .text-slate-900 { color: #f1f5f9; }
+        html.dark .text-slate-500 { color: #cbd5e1; }
+        html.dark .text-slate-400 { color: #94a3b8; }
+        html.dark .text-slate-600 { color: #cbd5e1; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900">
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
     <!-- Header simple -->
-    <header class="bg-white border-b border-slate-100 py-6 sticky top-0 z-50 shadow-sm">
+    <header class="bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700 py-6 sticky top-0 z-50 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
             <a href="/" class="flex items-center gap-2">
                 <img src="{{ asset('images/logo.png') }}" alt="Up Fiesta Logo" class="h-10 w-auto">
             </a>
-            <a href="/" class="text-sm font-bold text-slate-600 hover:text-indigo-600 transition">Retour à l'accueil</a>
+            <a href="/" class="text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition">Retour à l'accueil</a>
         </div>
     </header>
 
     <main class="max-w-7xl mx-auto py-16 px-4">
         <div class="mb-12 text-center">
-            <h1 class="text-4xl font-black mb-4">Découvrez nos services</h1>
-            <p class="text-slate-500 text-lg">Trouvez le professionnel idéal pour tous vos besoins au Togo.</p>
+            <h1 class="text-4xl font-black dark:text-white mb-4">Découvrez nos services</h1>
+            <p class="text-slate-500 dark:text-slate-400 text-lg">Trouvez le professionnel idéal pour tous vos besoins au Togo.</p>
         </div>
 
         <!-- Filtres par type -->
         <div class="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-12">
             <a href="{{ route('categories.index') }}"
-               class="px-4 sm:px-6 py-3 rounded-2xl font-bold transition text-center {{ !$kind ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'bg-white text-slate-600 border border-slate-100 hover:bg-slate-50' }}">
+               class="px-4 sm:px-6 py-3 rounded-2xl font-bold transition text-center {{ !$kind ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100 dark:shadow-indigo-900/50' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700' }}">
                 Toutes
             </a>
             <a href="{{ route('categories.index', ['kind' => 'prestations']) }}"
-               class="px-4 sm:px-6 py-3 rounded-2xl font-bold transition text-center {{ $kind === 'prestations' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'bg-white text-slate-600 border border-slate-100 hover:bg-slate-50' }}">
+               class="px-4 sm:px-6 py-3 rounded-2xl font-bold transition text-center {{ $kind === 'prestations' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100 dark:shadow-indigo-900/50' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700' }}">
                 <span class="hidden sm:inline">Prestations (Événementiel)</span>
                 <span class="sm:hidden">Événementiel</span>
             </a>
             <a href="{{ route('categories.index', ['kind' => 'domestiques']) }}"
-               class="px-4 sm:px-6 py-3 rounded-2xl font-bold transition text-center {{ $kind === 'domestiques' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'bg-white text-slate-600 border border-slate-100 hover:bg-slate-50' }}">
+               class="px-4 sm:px-6 py-3 rounded-2xl font-bold transition text-center {{ $kind === 'domestiques' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100 dark:shadow-indigo-900/50' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700' }}">
                 <span class="hidden sm:inline">Services Domestiques</span>
                 <span class="sm:hidden">Domestiques</span>
             </a>
@@ -94,9 +113,9 @@
                         @forelse($category->providers as $provider)
                             @include('partials.provider-card', ['provider' => $provider])
                         @empty
-                            <div class="col-span-full py-8 text-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-100">
-                                <p class="text-slate-400 font-medium">Aucun professionnel disponible pour le moment dans cette catégorie.</p>
-                                <a href="{{ route('service-requests.create') }}" class="inline-block mt-4 text-sm font-bold text-indigo-600 hover:underline">
+                            <div class="col-span-full py-8 text-center bg-slate-50 dark:bg-slate-800 rounded-3xl border-2 border-dashed border-slate-100 dark:border-slate-700">
+                                <p class="text-slate-400 dark:text-slate-500 font-medium">Aucun professionnel disponible pour le moment dans cette catégorie.</p>
+                                <a href="{{ route('service-requests.create') }}" class="inline-block mt-4 text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
                                     Exprimer un besoin spécifique →
                                 </a>
                             </div>
@@ -107,8 +126,18 @@
         </div>
     </main>
 
-    <footer class="bg-white border-t border-slate-100 py-12 px-4 mt-20 text-center">
-        <p class="text-slate-400 text-sm font-medium">&copy; 2026 Up Fiesta. Tous droits réservés.</p>
+    <footer class="bg-white dark:bg-slate-800 border-t border-slate-100 dark:border-slate-700 py-12 px-4 mt-20 text-center">
+        <p class="text-slate-400 dark:text-slate-500 text-sm font-medium">&copy; 2026 Up Fiesta. Tous droits réservés.</p>
     </footer>
+
+    <script>
+        // Dark mode toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const isDark = localStorage.getItem('theme') === 'dark';
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+            }
+        });
+    </script>
 </body>
 </html>

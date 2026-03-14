@@ -67,16 +67,20 @@
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label for="cni_number" class="block text-sm font-bold text-slate-700 mb-1">Numéro CNI / Passeport <span class="text-rose-500">*</span></label>
-                            <input id="cni_number" name="cni_number" type="text" required value="{{ old('cni_number') }}" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 outline-none transition-all" placeholder="Numéro de votre pièce">
+                            <label for="cni_number" class="block text-sm font-bold text-slate-700 mb-1">Numéro CNI <span class="text-rose-500">*</span></label>
+                            <input id="cni_number" name="cni_number" type="text" required value="{{ old('cni_number') }}" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 outline-none transition-all" placeholder="Numéro de votre CNI">
                         </div>
-                        <div class="space-y-4">
+                        <div>
+                            <label for="years_of_experience" class="block text-sm font-bold text-slate-700 mb-1">Années d'expérience <span class="text-rose-500">*</span></label>
+                            <input id="years_of_experience" name="years_of_experience" type="number" required min="0" max="70" value="{{ old('years_of_experience', 0) }}" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 outline-none transition-all" placeholder="0">
+                        </div>
+                        <div class="space-y-4 md:col-span-2">
                             <div>
-                                <label for="cni_photo_front" class="block text-sm font-bold text-slate-700 mb-1">CNI / Passeport (Recto) <span class="text-rose-500">*</span></label>
+                                <label for="cni_photo_front" class="block text-sm font-bold text-slate-700 mb-1">CNI (Recto) <span class="text-rose-500">*</span></label>
                                 <input id="cni_photo_front" name="cni_photo_front" type="file" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
                             </div>
                             <div>
-                                <label for="cni_photo_back" class="block text-sm font-bold text-slate-700 mb-1">CNI / Passeport (Verso) "Pour le Passeport ajouter un dexième fois le recto" <span class="text-rose-500">*</span></label>
+                                <label for="cni_photo_back" class="block text-sm font-bold text-slate-700 mb-1">CNI (Verso) <span class="text-rose-500">*</span></label>
                                 <input id="cni_photo_back" name="cni_photo_back" type="file" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
                             </div>
                         </div>

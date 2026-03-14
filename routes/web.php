@@ -13,6 +13,7 @@ use App\Http\Controllers\ContactController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/search', [HomeController::class, 'search'])->name('search');
 
 // Contact
 Route::get('/contact', [ContactController::class, 'show'])->name('contact');
@@ -104,18 +105,18 @@ Route::get('/categories/{category}', [\App\Http\Controllers\ServiceCategoryContr
 
 // Admin notification redirects (only for authenticated admins)
 Route::middleware(['auth'])->group(function () {
-    Route::get('/admin/users/{id}', function ($id) {
-        $user = auth()->user();
+    Route::get('/admin/users/{id}/{page?}', function ($id, $page = 'edit') {
+        $user = \Illuminate\Support\Facades\Auth::user();
         if ($user && $user->role === 'admin') {
-            return redirect("/up-fiesta-kygj/users/{$id}/edit");
+            return redirect("/up-fiesta-kygj/users/{$id}/{$page}");
         }
         abort(403, 'Accès non autorisé');
     });
 
-    Route::get('/admin/service-requests/{id}', function ($id) {
-        $user = auth()->user();
+    Route::get('/admin/service-requests/{id}/{page?}', function ($id, $page = 'edit') {
+        $user = \Illuminate\Support\Facades\Auth::user();
         if ($user && $user->role === 'admin') {
-            return redirect("/up-fiesta-kygj/service-requests/{$id}/edit");
+            return redirect("/up-fiesta-kygj/service-requests/{$id}/{$page}");
         }
         abort(403, 'Accès non autorisé');
     });
@@ -146,6 +147,10 @@ Route::middleware(['auth'])->group(function () {
         ->name('provider.requests.index');
     Route::post('/prestataire/demandes/{service_request}/status', [ServiceRequestController::class, 'updateStatus'])
         ->name('service-requests.status');
+    
+    // Note: Assigned Services routes are now handled by Filament Resources
+    // - Admin: /up-fiesta-kygj/assigned-services (Filament AdminPanelProvider)
+    // - Provider: /prestataire/assigned-services (Filament ProviderPanelProvider)
     
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });

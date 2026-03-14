@@ -1,17 +1,37 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $category->name }} - Up Fiesta</title>
+    
+    <!-- Favicon -->
+    <link rel="apple-touch-icon" href="/favicon-192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+    
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' };
+    </script>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700" rel="stylesheet" />
     <style>
         body { font-family: 'Instrument Sans', sans-serif; }
+        html.dark body { background-color: #020617; color: #e5e7eb; }
+        html.dark .bg-white { background-color: #1a1f2e; }
+        html.dark .bg-slate-50 { background-color: #1e293b; }
+        html.dark .border-slate-100 { border-color: #334155; }
+        html.dark .text-slate-900 { color: #f1f5f9; }
+        html.dark .text-slate-500 { color: #cbd5e1; }
+        html.dark .text-slate-400 { color: #94a3b8; }
+        html.dark .text-slate-600 { color: #cbd5e1; }
+        html.dark .text-slate-300 { color: #cbd5e1; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900">
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
     <header class="bg-white border-b border-slate-100 py-6 sticky top-0 z-50 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
             <a href="/" class="flex items-center gap-2">

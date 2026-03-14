@@ -10,8 +10,6 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ProviderResource extends Resource
 {
@@ -82,6 +80,7 @@ class ProviderResource extends Resource
                         Forms\Components\FileUpload::make('logo')
                             ->label('Logo')
                             ->image()
+                            ->disk('public')
                             ->directory('providers-logos'),
                         Forms\Components\Toggle::make('is_verified')
                             ->label('Vérifié')
@@ -101,20 +100,27 @@ class ProviderResource extends Resource
                     ->description('Ces documents sont nécessaires pour valider le compte du prestataire.')
                     ->schema([
                         Forms\Components\TextInput::make('cni_number')
-                            ->label('Numéro CNI / Passeport')
+                            ->label('Numéro CNI')
+                            ->disabled()
+                            ->dehydrated(false),
+                        Forms\Components\TextInput::make('years_of_experience')
+                            ->label('Années d\'expérience')
+                            ->numeric()
                             ->disabled()
                             ->dehydrated(false),
                         Forms\Components\FileUpload::make('cni_photo_front')
-                            ->label('CNI / Passeport (Recto)')
+                            ->label('CNI (Recto)')
                             ->image()
+                            ->disk('public')
                             ->directory('verification/cni')
                             ->visibility('public')
                             ->required()
                             ->openable()
                             ->downloadable(),
                         Forms\Components\FileUpload::make('cni_photo_back')
-                            ->label('CNI / Passeport (Verso)')
+                            ->label('CNI (Verso)')
                             ->image()
+                            ->disk('public')
                             ->directory('verification/cni')
                             ->visibility('public')
                             ->required()
@@ -130,12 +136,14 @@ class ProviderResource extends Resource
                             ->dehydrated(false),
                         Forms\Components\FileUpload::make('company_proof_doc_front')
                             ->label('Preuve d\'enregistrement (Recto / Page 1)')
+                            ->disk('public')
                             ->directory('verification/company')
                             ->visibility('public')
                             ->openable()
                             ->downloadable(),
                         Forms\Components\FileUpload::make('company_proof_doc_back')
                             ->label('Preuve d\'enregistrement (Verso / Page 2)')
+                            ->disk('public')
                             ->directory('verification/company')
                             ->visibility('public')
                             ->openable()
