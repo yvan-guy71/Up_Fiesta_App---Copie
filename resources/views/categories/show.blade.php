@@ -48,7 +48,7 @@
         <div class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
                 <span class="text-indigo-600 font-bold uppercase tracking-widest text-xs mb-2 block">
-                    {{ $category->kind === 'prestations' ? 'Prestations (Événementiel)' : 'Services Domestiques' }}
+                    {{ $category->kind === 'prestations' ? __('messages.categories.kind_prestations') : __('messages.categories.kind_domestiques') }}
                 </span>
                 <h1 class="text-4xl font-black">{{ $category->name }}</h1>
                 <p class="text-slate-500 mt-2">Découvrez les prestataires disponibles dans cette catégorie.</p>

@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Devenir Professionnel - Up Fiesta</title>
+    
+    <!-- Favicon -->
+    <link rel="apple-touch-icon" href="/favicon-192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@24.5.0/build/css/intlTelInput.css">
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -106,8 +114,8 @@
                             <label for="service_kind" class="block text-sm font-bold text-slate-700 mb-1">Type de service <span class="text-rose-500">*</span></label>
                             <select id="service_kind" name="service_kind" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 outline-none transition-all appearance-none bg-white">
                                 <option value="">Choisir un type...</option>
-                                <option value="{{ App\Models\ServiceCategory::KIND_PRESTATIONS }}" {{ old('service_kind') == App\Models\ServiceCategory::KIND_PRESTATIONS ? 'selected' : '' }}>Prestations (Événementiel, etc.)</option>
-                                <option value="{{ App\Models\ServiceCategory::KIND_DOMESTIQUES }}" {{ old('service_kind') == App\Models\ServiceCategory::KIND_DOMESTIQUES ? 'selected' : '' }}>Domestiques (Maison, Travaux, etc.)</option>
+                                <option value="{{ App\Models\ServiceCategory::KIND_PRESTATIONS }}" {{ old('service_kind') == App\Models\ServiceCategory::KIND_PRESTATIONS ? 'selected' : '' }}>{{ __('messages.categories.kind_prestations') }} (Événementiel, etc.)</option>
+                                <option value="{{ App\Models\ServiceCategory::KIND_DOMESTIQUES }}" {{ old('service_kind') == App\Models\ServiceCategory::KIND_DOMESTIQUES ? 'selected' : '' }}>{{ __('messages.categories.kind_domestiques') }} (Maison, Travaux, etc.)</option>
                             </select>
                         </div>
                         <div id="category_container" class="{{ old('service_kind') ? '' : 'hidden' }}">
@@ -117,12 +125,12 @@
                                     $prestations = $categories->where('kind', App\Models\ServiceCategory::KIND_PRESTATIONS);
                                     $domestiques = $categories->where('kind', App\Models\ServiceCategory::KIND_DOMESTIQUES);
                                 @endphp
-                                <optgroup label="Prestations" data-kind="{{ App\Models\ServiceCategory::KIND_PRESTATIONS }}">
+                                <optgroup label="{{ __('messages.categories.kind_prestations') }}" data-kind="{{ App\Models\ServiceCategory::KIND_PRESTATIONS }}">
                                     @foreach($prestations as $category)
                                         <option value="{{ $category->id }}" {{ (is_array(old('category_ids')) && in_array($category->id, old('category_ids'))) ? 'selected' : '' }}>{{ $category->name }}</option>
                                     @endforeach
                                 </optgroup>
-                                <optgroup label="Domestiques" data-kind="{{ App\Models\ServiceCategory::KIND_DOMESTIQUES }}">
+                                <optgroup label="{{ __('messages.categories.kind_domestiques') }}" data-kind="{{ App\Models\ServiceCategory::KIND_DOMESTIQUES }}">
                                     @foreach($domestiques as $category)
                                         <option value="{{ $category->id }}" {{ (is_array(old('category_ids')) && in_array($category->id, old('category_ids'))) ? 'selected' : '' }}>{{ $category->name }}</option>
                                     @endforeach

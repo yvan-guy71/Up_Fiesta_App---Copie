@@ -55,13 +55,13 @@
             </a>
             <a href="{{ route('categories.index', ['kind' => 'prestations']) }}"
                class="px-4 sm:px-6 py-3 rounded-2xl font-bold transition text-center {{ $kind === 'prestations' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100 dark:shadow-indigo-900/50' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700' }}">
-                <span class="hidden sm:inline">Prestations (Événementiel)</span>
+                <span class="hidden sm:inline">{{ __('messages.categories.kind_prestations') }} (Événementiel)</span>
                 <span class="sm:hidden">Événementiel</span>
             </a>
             <a href="{{ route('categories.index', ['kind' => 'domestiques']) }}"
                class="px-4 sm:px-6 py-3 rounded-2xl font-bold transition text-center {{ $kind === 'domestiques' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100 dark:shadow-indigo-900/50' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700' }}">
-                <span class="hidden sm:inline">Services Domestiques</span>
-                <span class="sm:hidden">Domestiques</span>
+                <span class="hidden sm:inline">{{ __('messages.categories.kind_domestiques') }}</span>
+                <span class="sm:hidden">Services à domicile</span>
             </a>
         </div>
 

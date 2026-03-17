@@ -10,6 +10,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Actions\Action;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
@@ -108,6 +109,12 @@ class UserResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Action::make('Contacter')
+                    ->icon('heroicon-o-chat-bubble-left-right')
+                    ->color('info')
+                    ->url(fn ($record) => route('messages.show', ['user' => $record->id]))
+                    ->visible(fn ($record) => $record->id !== auth()->id()) // Don't contact self
+                    ->openUrlInNewTab(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

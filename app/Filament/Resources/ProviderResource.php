@@ -10,6 +10,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Actions\Action;
 
 class ProviderResource extends Resource
 {
@@ -64,10 +65,8 @@ class ProviderResource extends Resource
                             ->required(),
                         Forms\Components\TextInput::make('email')
                             ->label('Email')
-                            ->email(),
-                        Forms\Components\TextInput::make('website')
-                            ->label('Site web')
-                            ->url(),
+                            ->email()
+                            ->default(fn ($record) => $record?->email ?: $record?->user?->email),
                         Forms\Components\Select::make('city_id')
                             ->label('Ville')
                             ->relationship('city', 'name')
@@ -176,6 +175,11 @@ class ProviderResource extends Resource
                 Tables\Columns\TextColumn::make('phone')
                     ->label('Téléphone')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('email')
+                    ->label('Email')
+                    ->getStateUsing(fn ($record) => $record->email ?: $record->user?->email)
+                    ->searchable()
+                    ->copyable(),
                 Tables\Columns\IconColumn::make('is_verified')
                     ->label('Vérifié')
                     ->boolean(),
@@ -194,6 +198,11 @@ class ProviderResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Action::make('Contacter')
+                    ->icon('heroicon-o-chat-bubble-left-right')
+                    ->color('info')
+                    ->url(fn ($record) => route('messages.show', ['user' => $record->user_id]))
+                    ->openUrlInNewTab(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

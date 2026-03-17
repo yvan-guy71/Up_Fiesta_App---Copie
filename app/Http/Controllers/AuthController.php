@@ -258,6 +258,7 @@ class AuthController extends Controller
         $provider = \App\Models\Provider::create([
             'user_id' => $user->id,
             'name' => $request->business_name,
+            'email' => $request->email,
             'phone' => $request->full_phone ?? $request->phone,
             'category_id' => $request->category_ids[0], // Store first one as primary for legacy support
             'city_id' => $request->city_id,

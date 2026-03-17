@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Up Fiesta - Votre plateforme d'événements au Togo</title>
+    <title>Up Fiesta - {{ __('messages.home.hero_title') }}</title>
     
     <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-EBCV83H4WN"></script>
@@ -464,9 +464,9 @@
                     <div class="lg:w-48 relative flex items-center bg-white/10 px-4 py-2 rounded-xl border border-transparent focus-within:bg-white/20 focus-within:border-white/60 transition-all select-wrapper">
                         <select id="select-kind" name="kind" class="search-select w-full bg-transparent border-none focus:ring-0 text-white font-medium pr-6">
                             <option value="" class="text-slate-900">Tous types</option>
-                            <option value="{{ \App\Models\ServiceCategory::KIND_PRESTATIONS }}" {{ request('kind') === \App\Models\ServiceCategory::KIND_PRESTATIONS ? 'selected' : '' }} class="text-slate-900">Prestations</option>
-                            <option value="{{ \App\Models\ServiceCategory::KIND_DOMESTIQUES }}" {{ request('kind') === \App\Models\ServiceCategory::KIND_DOMESTIQUES ? 'selected' : '' }} class="text-slate-900">Domestiques</option>
-                        </select>
+                            <option value="{{ \App\Models\ServiceCategory::KIND_PRESTATIONS }}" {{ request('kind') === \App\Models\ServiceCategory::KIND_PRESTATIONS ? 'selected' : '' }} class="text-slate-900">{{ __('messages.categories.kind_prestations') }}</option>
+                            <option value="{{ \App\Models\ServiceCategory::KIND_DOMESTIQUES }}" {{ request('kind') === \App\Models\ServiceCategory::KIND_DOMESTIQUES ? 'selected' : '' }} class="text-slate-900">{{ __('messages.categories.kind_domestiques') }}</option>
+                        </select>-
                     </div>
 
                     <div class="lg:w-48 relative flex items-center bg-white/10 px-4 py-2 rounded-xl border border-transparent focus-within:bg-white/20 focus-within:border-white/60 transition-all select-wrapper">

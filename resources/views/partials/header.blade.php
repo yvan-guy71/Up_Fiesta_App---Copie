@@ -13,8 +13,8 @@
             <div class="hidden lg:flex items-center gap-6 ml-4">
                 <a href="javascript:void(0)" onclick="focusSearch()" class="text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">{{ __('messages.nav.find_provider') }}</a>
                 <a href="#categories" class="text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">{{ __('messages.nav.categories') }}</a>
-                <a href="#featured" class="text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">A la une</a>
-                <a href="{{ route('help.how') }}" class="text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Comment ça marche</a>
+                <a href="#featured" class="text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">{{ __('messages.nav.featured') }}</a>
+                <a href="{{ route('help.how') }}" class="text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">{{ __('messages.nav.how_it_works') }}</a>
                 <div class="h-4 w-[1px] bg-slate-200 dark:bg-slate-700 mx-2"></div>
                 @if(!auth()->check() || auth()->user()->role !== 'client')
                 <a href="{{ route('register.provider') }}" class="text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors">{{ __('messages.nav.pro_space') }}</a>
@@ -41,11 +41,11 @@
                 </button>
                 <div id="settings-dropdown"
                      class="preferences-menu fixed top-20 inset-x-4 sm:absolute sm:top-auto sm:inset-x-auto sm:right-0 mt-2 w-auto sm:w-52 max-w-xs rounded-xl bg-white dark:bg-slate-800 shadow-lg dark:shadow-slate-900 border border-slate-100 dark:border-slate-700 text-sm z-50 hidden">
-                    <a href="{{ route('help.how') }}" class="w-full block px-3 py-2 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700">Comment ça marche</a>
+                    <a href="{{ route('help.how') }}" class="w-full block px-3 py-2 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700">{{ __('messages.nav.how_it_works') }}</a>
                     <button type="button"
                             onclick="toggleTheme()"
                             class="w-full flex items-center justify-between px-3 py-2 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700">
-                        <span>Thèmes</span>
+                        <span>{{ __('messages.nav.dark_mode') }}</span>
                         <span class="flex items-center gap-1 text-slate-500 dark:text-slate-400">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M12 3.25a1 1 0 0 1 1 1V6a1 1 0 1 1-2 0V4.25a1 1 0 0 1 1-1zm0 10a3 3 0 1 0-3-3 3 3 0 0 0 3 3zm8.75-3a1 1 0 0 1-1 1H18a1 1 0 0 1 0-2h1.75a1 1 0 0 1 1 1zM12 17a1 1 0 0 1 1 1v1.75a1 1 0 1 1-2 0V18a1 1 0 0 1 1-1zM7 12a1 1 0 0 1-1 1H4.25a1 1 0 0 1 0-2H6a1 1 0 0 1 1 1zm9.19 4.19a1 1 0 0 1 1.41 0l1.24 1.24a1 1 0 1 1-1.41 1.41l-1.24-1.24a1 1 0 0 1 0-1.41zM5.16 5.16a1 1 0 0 1 1.41 0L7.81 6.4A1 1 0 0 1 6.4 7.81L5.16 6.57a1 1 0 0 1 0-1.41z"/>
@@ -100,8 +100,8 @@
         <div class="px-4 py-4 space-y-3">
             <a href="javascript:void(0)" onclick="focusSearch(); toggleMobileMenu()" class="block px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700">{{ __('messages.nav.find_provider') }}</a>
             <a href="#categories" onclick="toggleMobileMenu()" class="block px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700">{{ __('messages.nav.categories') }}</a>
-            <a href="#featured" onclick="toggleMobileMenu()" class="block px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700">A la une</a>
-            <a href="{{ route('help.how') }}" class="block px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700">Comment ça marche</a>
+            <a href="#featured" onclick="toggleMobileMenu()" class="block px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700">{{ __('messages.nav.featured') }}</a>
+            <a href="{{ route('help.how') }}" class="block px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700">{{ __('messages.nav.how_it_works') }}</a>
             @if(!auth()->check() || auth()->user()->role !== 'client')
                 <div class="border-t border-slate-100 dark:border-slate-700 pt-3">
                     <a href="{{ route('register.provider') }}" class="block px-4 py-2 rounded-lg text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30">{{ __('messages.nav.pro_space') }}</a>
