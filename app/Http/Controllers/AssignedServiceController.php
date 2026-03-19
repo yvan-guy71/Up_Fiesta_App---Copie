@@ -5,9 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\AssignedService;
 use App\Models\Provider;
 use App\Models\ServiceRequest;
+use App\Models\User;
+use App\Models\Message;
 use App\Notifications\ServiceAssignedNotification;
+use App\Notifications\AssignmentAcceptedAdminNotification;
+use App\Notifications\AssignmentRejectedAdminNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
 
 class AssignedServiceController extends Controller
 {
@@ -120,6 +125,33 @@ class AssignedServiceController extends Controller
         // Update service request status
         $assignedService->serviceRequest->update(['status' => 'assigned']);
 
+        // Notify admins
+        $admins = User::where('role', 'admin')->get();
+        if ($admins->isNotEmpty()) {
+            Notification::send($admins, new AssignmentAcceptedAdminNotification($assignedService));
+            
+            foreach ($admins as $admin) {
+                Message::create([
+                    'sender_id' => $user->id,
+                    'receiver_id' => $admin->id,
+                    'content' => "J'accepte la mission pour la demande : " . $assignedService->serviceRequest->subject,
+                ]);
+            }
+        }
+
+        // Admin informs client (automated notification from admin to client)
+        $client = $assignedService->serviceRequest->user;
+        $admin = $admins->first() ?? User::where('role', 'admin')->first();
+        if ($admin) {
+            Message::create([
+                'sender_id' => $admin->id,
+                'receiver_id' => $client->id,
+                'content' => "Bonne nouvelle ! Le prestataire " . $provider->name . " a accepté votre demande pour : " . $assignedService->serviceRequest->subject . ". Nous restons à votre disposition pour la suite.",
+            ]);
+            // You might want a specific notification for the client here as well
+            // $client->notify(new AssignmentAcceptedClientNotification($assignedService));
+        }
+
         return back()->with('success', 'Service assignment accepted! You can now start working on it.');
     }
 
@@ -148,6 +180,49 @@ class AssignedServiceController extends Controller
             'rejection_reason' => $validated['reason'],
             'responded_at' => now(),
         ]);
+
+        // Notify admins
+        $admins = User::where('role', 'admin')->get();
+        if ($admins->isNotEmpty()) {
+            Notification::send($admins, new AssignmentRejectedAdminNotification($assignedService));
+            
+            foreach ($admins as $admin) {
+                Message::create([
+                    'sender_id' => $user->id,
+                    'receiver_id' => $admin->id,
+                    'content' => "Je refuse la mission pour la demande : " . $assignedService->serviceRequest->subject . ". Raison : " . $validated['reason'],
+                ]);
+            }
+        }
+
+        // Admin informs client about rejection and proposes another provider if available
+        $client = $assignedService->serviceRequest->user;
+        $admin = $admins->first() ?? User::where('role', 'admin')->first();
+        if ($admin) {
+            $otherProviders = Provider::where('id', '!=', $provider->id)
+                 ->where('is_verified', true)
+                 ->where(function($q) use ($provider) {
+                     if ($provider->category_id) {
+                         $q->where('category_id', $provider->category_id);
+                     }
+                 })
+                 ->limit(3)
+                 ->get();
+
+            $proposal = "";
+            if ($otherProviders->isNotEmpty()) {
+                $names = $otherProviders->pluck('name')->implode(', ');
+                $proposal = "\nNous vous proposons ces prestataires alternatifs : " . $names . ". N'hésitez pas à nous dire si l'un d'eux vous intéresse.";
+            }
+
+            Message::create([
+                'sender_id' => $admin->id,
+                'receiver_id' => $client->id,
+                'content' => "Nous avons le regret de vous informer que le prestataire initialement choisi n'est pas disponible pour votre demande : " . $assignedService->serviceRequest->subject . ". " . $proposal,
+            ]);
+            // You might want a specific notification for the client here as well
+            // $client->notify(new AssignmentRejectedClientNotification($assignedService));
+        }
 
         return back()->with('success', 'Assignment rejected successfully.');
     }

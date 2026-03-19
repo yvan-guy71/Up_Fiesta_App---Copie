@@ -7,10 +7,56 @@ use App\Models\AssignedService;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists;
 use Filament\Infolists\Infolist;
+use Filament\Actions;
+use Filament\Forms;
 
 class ViewAssignedService extends ViewRecord
 {
     protected static string $resource = AssignedServiceResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\Action::make('accept')
+                ->label('✓ Accepter')
+                ->icon('heroicon-m-check-circle')
+                ->color('success')
+                ->size('lg')
+                ->requiresConfirmation()
+                ->modalHeading('Accepter cette assignation?')
+                ->modalDescription('Vous vous engagez à réaliser ce service dans les délais impartis.')
+                ->modalSubmitActionLabel('Oui, accepter')
+                ->visible(fn (?AssignedService $record) => $record?->isPending())
+                ->action(fn (AssignedService $record) => $this->acceptAssignment($record)),
+
+            Actions\Action::make('reject')
+                ->label('✗ Rejeter')
+                ->icon('heroicon-m-x-circle')
+                ->color('danger')
+                ->size('lg')
+                ->visible(fn (?AssignedService $record) => $record?->isPending())
+                ->form([
+                    Forms\Components\Textarea::make('rejection_reason')
+                        ->label('Raison du refus')
+                        ->required()
+                        ->maxLength(500)
+                        ->placeholder('Décrivez pourquoi vous ne pouvez pas accepter ce service (ex: trop occupé, compétences insuffisantes, etc.)'),
+                ])
+                ->action(fn (AssignedService $record, array $data) => $this->rejectAssignment($record, $data['rejection_reason'])),
+
+            Actions\Action::make('complete')
+                ->label('✓ Service terminé')
+                ->icon('heroicon-m-check')
+                ->color('info')
+                ->size('lg')
+                ->requiresConfirmation()
+                ->modalHeading('Marquer le service comme terminé?')
+                ->modalDescription('Confirmez que vous avez complété le service demandé.')
+                ->modalSubmitActionLabel('Oui, marqué comme terminé')
+                ->visible(fn (?AssignedService $record) => $record?->isAccepted())
+                ->action(fn (AssignedService $record) => $this->completeAssignment($record)),
+        ];
+    }
 
     public function infolist(Infolist $infolist): Infolist
     {
@@ -120,6 +166,82 @@ class ViewAssignedService extends ViewRecord
                     ])
                     ->collapsed(),
             ]);
+    }
+
+    protected function acceptAssignment(AssignedService $record): void
+    {
+        if (!$record->isPending()) {
+            \Filament\Notifications\Notification::make()
+                ->title('Action non valide')
+                ->body('Cette assignation ne peut pas être acceptée.')
+                ->danger()
+                ->send();
+            return;
+        }
+
+        $record->update([
+            'status' => 'accepted',
+            'responded_at' => now(),
+        ]);
+
+        \Filament\Notifications\Notification::make()
+            ->title('✓ Assignation acceptée')
+            ->body('Vous avez accepté cette assignation. Le client en a été notifié.')
+            ->success()
+            ->send();
+
+        $this->redirect(static::getResource()::getUrl('index'));
+    }
+
+    protected function rejectAssignment(AssignedService $record, string $reason): void
+    {
+        if (!$record->isPending()) {
+            \Filament\Notifications\Notification::make()
+                ->title('Action non valide')
+                ->body('Cette assignation ne peut pas être rejetée.')
+                ->danger()
+                ->send();
+            return;
+        }
+
+        $record->update([
+            'status' => 'rejected',
+            'rejection_reason' => $reason,
+            'responded_at' => now(),
+        ]);
+
+        \Filament\Notifications\Notification::make()
+            ->title('✗ Assignation rejetée')
+            ->body('Vous avez rejeté cette assignation. Le client en a été notifié et nous rechercherons un autre prestataire.')
+            ->warning()
+            ->send();
+
+        $this->redirect(static::getResource()::getUrl('index'));
+    }
+
+    protected function completeAssignment(AssignedService $record): void
+    {
+        if (!$record->isAccepted()) {
+            \Filament\Notifications\Notification::make()
+                ->title('Action non valide')
+                ->body('Cette assignation ne peut pas être complétée.')
+                ->danger()
+                ->send();
+            return;
+        }
+
+        $record->update([
+            'status' => 'completed',
+            'completed_at' => now(),
+        ]);
+
+        \Filament\Notifications\Notification::make()
+            ->title('✓ Service marqué comme complété')
+            ->body('L\'administrateur a été notifié. Le client recevra bientôt une demande d\'avis.')
+            ->success()
+            ->send();
+
+        $this->redirect(static::getResource()::getUrl('index'));
     }
 }
 

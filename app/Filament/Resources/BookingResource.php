@@ -29,11 +29,11 @@ class BookingResource extends Resource
                 Tables\Columns\TextColumn::make('event_date')->label('Date')->date('d/m/Y')->sortable(),
                 Tables\Columns\TextColumn::make('total_price')->label('Total')->money('XOF')->sortable(),
                 Tables\Columns\TextColumn::make('status')->label('Statut')->badge()
-                    ->color(fn (string $s) => match ($s) {
+                    ->color(fn (string $state) => match ($state) {
                         'pending' => 'warning', 'confirmed' => 'info', 'completed' => 'success', 'cancelled' => 'danger', default => 'gray',
                     }),
                 Tables\Columns\TextColumn::make('payment_status')->label('Paiement')->badge()
-                    ->color(fn (string $s) => match ($s) {
+                    ->color(fn (string $state) => match ($state) {
                         'paid' => 'success', 'pending' => 'warning', 'failed' => 'danger', default => 'gray',
                     }),
                 Tables\Columns\IconColumn::make('provider_done')->label('Prestataire')
@@ -42,7 +42,7 @@ class BookingResource extends Resource
                 Tables\Columns\TextColumn::make('platform_fee')->label('Frais')->money('XOF'),
                 Tables\Columns\TextColumn::make('provider_amount')->label('À verser')->money('XOF'),
                 Tables\Columns\TextColumn::make('payout_status')->label('Versement')->badge()
-                    ->color(fn (string $s) => match ($s) { 'paid' => 'success', 'pending' => 'warning', default => 'gray' }),
+                    ->color(fn (string $state) => match ($state) { 'paid' => 'success', 'pending' => 'warning', default => 'gray' }),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')->options([
@@ -60,7 +60,22 @@ class BookingResource extends Resource
                     ->color('info')
                     ->requiresConfirmation()
                     ->visible(fn (Booking $r) => $r->status === 'pending')
-                    ->action(fn (Booking $r) => $r->update(['status' => 'confirmed'])),
+                    ->action(function (Booking $r) {
+                        $r->update(['status' => 'confirmed']);
+                        
+                        // Notify client to pay
+                        try {
+                            \App\Services\SmsService::notifyPaymentRequested($r);
+                        } catch (\Exception $e) {
+                            \Illuminate\Support\Facades\Log::error("Erreur SMS paiement: " . $e->getMessage());
+                        }
+
+                        \Filament\Notifications\Notification::make()
+                            ->title('Réservation confirmée')
+                            ->body('Le client a été notifié pour procéder au paiement.')
+                            ->success()
+                            ->send();
+                    }),
                 Tables\Actions\Action::make('complete_and_payout')
                     ->label('Terminer et payer le prestataire')
                     ->icon('heroicon-o-check-badge')

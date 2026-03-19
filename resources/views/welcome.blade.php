@@ -566,18 +566,18 @@
              @endphp
             <div class="relative group rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition h-40 md:h-48 {{ $selected ? 'ring-4 ring-indigo-500' : '' }}">
                 <!-- full clickable area for category detail page -->
-                <a href="{{ route('categories.show', $category->id) }}" class="absolute inset-0 z-0"></a>
+                <a href="{{ route('search', ['category' => $category->id]) }}" class="absolute inset-0 z-20"></a>
                 <!-- quick type filter icon -->
-                <a href="{{ route('categories.index', ['kind' => $category->kind]) }}" class="absolute top-2 left-2 z-10 bg-white/70 p-1 rounded-full hover:bg-white transition">
+                <a href="{{ route('home', ['kind' => $category->kind]) }}#categories" class="absolute top-2 left-2 z-30 bg-white/70 p-1 rounded-full hover:bg-white transition">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h3m10 0h3a1 1 0 011 1v3M3 16v3a1 1 0 001 1h3m10 0h3a1 1 0 001-1v-3" />
                     </svg>
                 </a>
-            <img src="{{ asset($imagePath) }}" alt="{{ $category->name }}" class="w-full h-full object-cover">
-            <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-4 bg-black/40 text-white transition-opacity duration-700 group-hover:opacity-0">
-                <h3 class="font-bold text-lg md:text-xl">{{ $category->name }}</h3>
-                <p class="text-sm opacity-90 mt-1">{{ $category->providers_count }} professionnels disponibles</p>
-            </div>
+                <img src="{{ asset($imagePath) }}" alt="{{ $category->name }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-4 bg-black/40 text-white transition-opacity duration-300 z-10">
+                    <h3 class="font-bold text-lg md:text-xl">{{ $category->name }}</h3>
+                    <p class="text-sm opacity-90 mt-1">{{ $category->providers_count }} professionnels disponibles</p>
+                </div>
             </div>
              @endforeach
              </div>
@@ -704,10 +704,10 @@
     </footer>
     <!-- Booking Modal -->
     <div id="bookingModal" class="fixed inset-0 bg-black bg-opacity-50 z-[100] hidden items-center justify-center p-4">
-        <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl transform transition-all">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-md w-full p-8 shadow-2xl transform transition-all border border-slate-100 dark:border-slate-700">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-slate-900">Réserver un service <span id="modalProviderName" class="text-indigo-600"></span></h2>
-                <button onclick="closeBookingModal()" class="text-slate-400 hover:text-slate-600">
+                <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Réserver un service <span id="modalProviderName" class="text-indigo-600 dark:text-indigo-400"></span></h2>
+                <button onclick="closeBookingModal()" class="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-400">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -717,160 +717,23 @@
                 @csrf
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-2">Date souhaitée</label>
-                        <input type="date" name="event_date" required min="{{ date('Y-m-d', strtotime('+1 day')) }}" class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Date souhaitée</label>
+                        <input type="date" name="event_date" required min="{{ date('Y-m-d', strtotime('+1 day')) }}" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none">
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-2">Détails du besoin</label>
-                        <textarea name="event_details" rows="3" placeholder="Lieu, description de la tâche, nombre de personnes..." class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 outline-none"></textarea>
+                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Détails du besoin</label>
+                        <textarea name="event_details" rows="3" placeholder="Lieu, description de la tâche, nombre de personnes..." class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-indigo-500 outline-none"></textarea>
                     </div>
                 </div>
                 <div class="mt-8 flex gap-4">
-                    <button type="button" onclick="closeBookingModal()" class="flex-1 px-6 py-3 border border-slate-200 rounded-xl font-bold text-slate-600 hover:bg-slate-50 transition">Annuler</button>
-                    <button type="submit" class="flex-1 px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition shadow-lg shadow-indigo-200">Confirmer</button>
+                    <button type="button" onclick="closeBookingModal()" class="flex-1 px-6 py-3 border border-slate-200 dark:border-slate-600 rounded-xl font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition">Annuler</button>
+                    <button type="submit" class="flex-1 px-6 py-3 bg-indigo-600 dark:bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 dark:hover:bg-indigo-700 transition shadow-lg shadow-indigo-200 dark:shadow-indigo-900">Confirmer</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <script>
-        function toggleMobileMenu() {
-            const menu = document.getElementById('mobile-menu');
-            const content = document.getElementById('mobile-menu-content');
-            
-            if (menu.classList.contains('hidden')) {
-                menu.classList.remove('hidden');
-                setTimeout(() => {
-                    content.classList.remove('-translate-x-full');
-                }, 10);
-            } else {
-                content.classList.add('-translate-x-full');
-                setTimeout(() => {
-                    menu.classList.add('hidden');
-                }, 300);
-            }
-        }
-
-        function setSearchValue(value) {
-            const searchInput = document.getElementById('search-q');
-            searchInput.value = value;
-            
-            // Petit effet visuel lors du clic sur une suggestion
-            const container = document.getElementById('search-input-container');
-            container.classList.add('ring-4', 'ring-white/30');
-            setTimeout(() => {
-                container.classList.remove('ring-4', 'ring-white/30');
-                document.getElementById('search-form').submit();
-            }, 2000);
-        }
-
-        function focusSearch() {
-            const searchInput = document.getElementById('search-q');
-            const container = document.getElementById('search-input-container');
-            const form = document.getElementById('search-form');
-
-            // Défilement vers le haut (Hero section)
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-
-            // Petit délai pour attendre le début du défilement
-            setTimeout(() => {
-                searchInput.focus();
-                
-                // Animation d'accentuation
-                container.classList.add('border-indigo-500', 'ring-4', 'ring-indigo-100');
-                form.classList.add('scale-[1.02]');
-                
-                // Retrait de l'animation après 2 secondes
-                setTimeout(() => {
-                    container.classList.remove('border-indigo-500', 'ring-4', 'ring-indigo-100');
-                    form.classList.remove('scale-[1.02]');
-                }, 2000);
-            }, 500);
-        }
-
-        // PWA Service Worker Registration
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js');
-            });
-        }
-
-        // Initialize Tom Select
-        document.addEventListener('DOMContentLoaded', () => {
-            const config = {
-                create: false,
-                sortField: {
-                    field: "text",
-                    direction: "asc"
-                },
-                allowEmptyOption: true,
-            };
-
-            const kindSelect = new TomSelect("#select-kind", config);
-            const categorySelect = new TomSelect("#select-category", config);
-            new TomSelect("#select-city", config);
-
-            // Store all category options
-            const allCategoryOptions = Array.from(document.querySelectorAll('#select-category option')).map(opt => ({
-                value: opt.value,
-                text: opt.text,
-                kind: opt.dataset.kind
-            }));
-
-            function filterCategories() {
-                const kind = kindSelect.getValue();
-                if (!kind) {
-                    categorySelect.clearOptions();
-                    categorySelect.addOptions(allCategoryOptions);
-                    return;
-                }
-                
-                const filtered = allCategoryOptions.filter(opt => !opt.kind || opt.kind === kind);
-                categorySelect.clearOptions();
-                categorySelect.addOptions(filtered);
-            }
-
-            kindSelect.on('change', filterCategories);
-            
-            // Initial filter if kind is selected
-            if (kindSelect.getValue()) {
-                filterCategories();
-                @if(request()->filled('category'))
-                    categorySelect.setValue("{{ request('category') }}");
-                @endif
-            }
-        });
-
-        function openBookingModal(id, name) {
-            @if(!auth()->check())
-            window.location.href = "{{ route('login') }}";
-            return;
-            @endif
-            
-            document.getElementById('modalProviderName').innerText = name;
-            document.getElementById('bookingForm').action = "/reserver/" + id;
-            document.getElementById('bookingModal').classList.remove('hidden');
-            document.getElementById('bookingModal').classList.add('flex');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeBookingModal() {
-            document.getElementById('bookingModal').classList.add('hidden');
-            document.getElementById('bookingModal').classList.remove('flex');
-            document.body.style.overflow = 'auto';
-        }
-
-        // Close on click outside
-        window.onclick = function(event) {
-            let modal = document.getElementById('bookingModal');
-            if (event.target == modal) {
-                closeBookingModal();
-            }
-        }
-    </script>
+    @include('partials.welcome-scripts')
 <script src='https://cdn.jotfor.ms/agent/embedjs/019c89b017677f818ad04959bf7bab1f8c44/embed.js'></script>
 </body>
 </html>

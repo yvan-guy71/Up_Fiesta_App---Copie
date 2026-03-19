@@ -84,6 +84,7 @@ class AssignedServiceResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->striped()
             ->columns([
                 Tables\Columns\TextColumn::make('serviceRequest.subject')
                     ->label('Service')
@@ -96,26 +97,30 @@ class AssignedServiceResource extends Resource
                     ->label('Client')
                     ->icon('heroicon-m-user-circle')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: false),
                 
                 Tables\Columns\TextColumn::make('provider.user.name')
                     ->label('Prestataire')
-                    ->icon('heroicon-m-user-check')
+                    ->icon('heroicon-m-check-badge')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: false),
                 
                 Tables\Columns\TextColumn::make('serviceRequest.budget')
                     ->label('Budget')
                     ->icon('heroicon-m-currency-dollar')
                     ->formatStateUsing(fn ($state) => number_format($state, 0) . ' XOF')
                     ->sortable()
-                    ->alignment('right'),
+                    ->alignment('right')
+                    ->toggleable(isToggledHiddenByDefault: false),
                 
                 Tables\Columns\TextColumn::make('serviceRequest.event_date')
                     ->label('Date du Service')
                     ->icon('heroicon-m-calendar')
                     ->dateTime('d/m/Y H:i')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: false),
                 
                 Tables\Columns\BadgeColumn::make('status')
                     ->label('Statut')
@@ -138,7 +143,8 @@ class AssignedServiceResource extends Resource
                         'completed' => 'Complété',
                         default => $state,
                     })
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: false),
                 
                 Tables\Columns\TextColumn::make('assigned_at')
                     ->label('Assigné le')
@@ -208,10 +214,10 @@ class AssignedServiceResource extends Resource
                     ->action(fn (AssignedService $record) => static::resendNotification($record)),
                 
                 Tables\Actions\Action::make('mark_completed')
-                    ->label('Marquer complété')
+                    ->label('Confirmer et notifier le client')
                     ->icon('heroicon-m-check')
                     ->color('success')
-                    ->visible(fn (AssignedService $record) => $record->isAccepted())
+                    ->visible(fn (AssignedService $record) => $record->isAccepted() || $record->isCompleted())
                     ->action(fn (AssignedService $record) => static::forceComplete($record)),
                 
                 Tables\Actions\DeleteAction::make()
@@ -254,25 +260,32 @@ class AssignedServiceResource extends Resource
 
     public static function forceComplete(AssignedService $record): void
     {
-        if (!$record->isAccepted()) {
+        if (!$record->isAccepted() && !$record->isCompleted()) {
             \Filament\Notifications\Notification::make()
                 ->title('Action non valide')
-                ->body('Seules les assignations acceptées peuvent être complétées.')
+                ->body('Seules les assignations acceptées ou complétées peuvent être confirmées.')
                 ->danger()
                 ->send();
             return;
         }
 
-        $record->update([
-            'status' => 'completed',
-            'completed_at' => now(),
-        ]);
+        // Only update status if not already completed
+        if ($record->isPending() || $record->isAccepted()) {
+            $record->update([
+                'status' => 'completed',
+                'completed_at' => now(),
+            ]);
 
-        $record->serviceRequest->update(['status' => 'completed']);
+            $record->serviceRequest->update(['status' => 'completed']);
+        }
+
+        // Always notify the client when the admin confirms completion
+        $client = $record->serviceRequest->user;
+        $client->notify(new \App\Notifications\AssignmentCompletionClientNotification($record));
 
         \Filament\Notifications\Notification::make()
             ->title('Service marqué complété')
-            ->body('L\'assignation a été marquée comme complétée.')
+            ->body('L\'assignation a été marquée comme complétée et le client a été notifié.')
             ->success()
             ->send();
     }

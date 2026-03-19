@@ -25,31 +25,8 @@
         <script src="https://cdn.tailwindcss.com"></script>
     @endif
 
-    <style>
-        html { scroll-behavior: smooth; }
-        /* Light mode placeholders */
-        input::placeholder { color: #94a3b8; }
-        select { color: #374151; }
-        /* Dark mode */
-        html.dark body { background-color: #020617; color: #f1f5f9; }
-        html.dark header { background-color: rgba(15, 23, 42, 0.95); border-bottom-color: #1f2937; }
-        html.dark section { background-color: transparent; }
-        html.dark .bg-white { background-color: #1e293b; border-color: #334155; }
-        html.dark .bg-slate-50 { background-color: #020617; }
-        html.dark .border-slate-100, html.dark .border-slate-200 { border-color: #334155; }
-        html.dark .text-slate-500, html.dark .text-slate-600, html.dark .text-slate-700, html.dark .text-slate-900 { color: #cbd5e1; }
-        html.dark input[type="text"], html.dark select { background-color: #0f172a; color: #f1f5f9; border-color: #334155; }
-        html.dark input::placeholder { color: #64748b; }
-        html.dark select option { background-color: #1e293b; color: #f1f5f9; }
-        html.dark select option:checked { background-color: #4f46e5; color: #ffffff; }
-        html.dark input:focus, html.dark select:focus { border-color: #6366f1; ring-color: #6366f1; }
-        html.dark footer { background-color: #020617; border-color: #1f2937; }
-        html.dark .bg-indigo-100 { background-color: #312e81; }
-        html.dark .text-indigo-700 { color: #a5b4fc; }
-        html.dark .bg-slate-100 { background-color: #1f2937; }
-        html.dark .hover\:bg-slate-200:hover { background-color: #334155; }
-        * { transition-property: background-color, border-color, color; transition-duration: 200ms; }
-    </style>
+    @include('partials.dark-mode-styles')
+    @include('partials.head-scripts')
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 font-sans text-slate-900 transition-colors duration-300">
     <!-- Navigation Header -->
@@ -224,29 +201,5 @@
 
     <!-- Footer -->
     @include('partials.footer')
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const stored = localStorage.getItem('theme');
-            const root = document.documentElement;
-
-            function applyTheme(mode) {
-                if (mode === 'dark') {
-                    root.classList.add('dark');
-                } else {
-                    root.classList.remove('dark');
-                }
-            }
-
-            applyTheme(stored === 'dark' ? 'dark' : 'light');
-
-            window.toggleTheme = function() {
-                const current = root.classList.contains('dark') ? 'dark' : 'light';
-                const next = current === 'dark' ? 'light' : 'dark';
-                localStorage.setItem('theme', next);
-                applyTheme(next);
-            };
-        });
-    </script>
 </body>
 </html>

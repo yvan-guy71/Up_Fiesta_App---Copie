@@ -5,6 +5,8 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 use App\Filament\Pages\Auth\ProviderLogin;
+use App\Models\ServiceRequest;
+use App\Observers\ServiceRequestObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -25,5 +27,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Livewire::component('app.filament.pages.auth.provider-login', ProviderLogin::class);
+        ServiceRequest::observe(ServiceRequestObserver::class);
     }
 }

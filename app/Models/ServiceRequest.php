@@ -33,6 +33,28 @@ class ServiceRequest extends Model
         'budget' => 'decimal:2',
     ];
 
+    protected static function booted()
+    {
+        static::updated(function ($record) {
+            if ($record->isDirty('provider_id') && $record->provider_id) {
+                $provider = $record->provider;
+                if ($provider && $provider->user) {
+                    $provider->user->notify(new \App\Notifications\ServiceRequestDirectNotification($record));
+                    
+                    // Also send SMS if possible
+                    try {
+                        $message = "Up Fiesta: Vous avez une nouvelle demande de service assignée. Connectez-vous pour la consulter.";
+                        if ($provider->phone) {
+                            \App\Services\SmsService::send($provider->phone, $message);
+                        }
+                    } catch (\Exception $e) {
+                        \Illuminate\Support\Facades\Log::error("Erreur SMS assignation: " . $e->getMessage());
+                    }
+                }
+            }
+        });
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

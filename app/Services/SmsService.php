@@ -36,8 +36,18 @@ class SmsService
         $provider = $booking->provider;
         $message = "Up Fiesta: Nouvelle demande de reservation pour le " . $booking->event_date->format('d/m/Y') . ". Connectez-vous pour confirmer.";
         
-        if ($provider->phone) {
+        if ($provider && $provider->phone) {
             self::send($provider->phone, $message);
+        }
+    }
+
+    public static function notifyPaymentRequested($booking)
+    {
+        $client = $booking->user;
+        $message = "Up Fiesta: Votre reservation #" . $booking->id . " est confirmee ! Vous pouvez maintenant proceder au paiement sur votre espace client.";
+        
+        if ($client && $client->phone) {
+            self::send($client->phone, $message);
         }
     }
 }

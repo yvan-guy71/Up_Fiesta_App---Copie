@@ -8,7 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class ServiceAssignedNotification extends Notification implements ShouldQueue
+class AssignmentCompletionAdminNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -36,17 +36,19 @@ class ServiceAssignedNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         $serviceRequest = $this->assignedService->serviceRequest;
-        
+        $provider = $this->assignedService->provider;
+        $client = $serviceRequest->user;
+
         return (new MailMessage)
             ->greeting('Bonjour ' . $notifiable->name . ',')
-            ->line('Un nouveau service vous a été assigné !')
-            ->line('**Détails du service:**')
+            ->line('Le prestataire a signalé la finalisation du service.')
+            ->line('**Informations du service:**')
             ->line('Sujet: ' . $serviceRequest->subject)
-            ->line('Description: ' . substr($serviceRequest->description, 0, 100) . '...')
-            ->line('Budget: ' . number_format($serviceRequest->budget, 2) . ' XOF')
-            ->line('Date: ' . $serviceRequest->event_date->format('d/m/Y H:i'))
-            ->action('Voir le détail', url('/prestataire/assigned-services/' . $this->assignedService->id))
-            ->line('Veuillez accepter ou refuser cette assignation dans votre espace professionnel.');
+            ->line('Prestataire: ' . $provider->name)
+            ->line('Client: ' . $client->name)
+            ->line('Date d\'exécution prévue: ' . $serviceRequest->event_date->format('d/m/Y H:i'))
+            ->action('Voir les détails', route('filament.admin.resources.assigned-services.view', $this->assignedService->id))
+            ->line('Veuillez contacter le client pour confirmer et finaliser le service.');
     }
 
     /**
@@ -59,14 +61,9 @@ class ServiceAssignedNotification extends Notification implements ShouldQueue
         return [
             'assigned_service_id' => $this->assignedService->id,
             'service_request_id' => $this->assignedService->service_request_id,
-            'subject' => $this->assignedService->serviceRequest->subject,
-            'client_name' => $this->assignedService->serviceRequest->user->name,
-            'budget' => $this->assignedService->serviceRequest->budget,
-            'event_date' => $this->assignedService->serviceRequest->event_date,
-            'message' => 'Une nouvelle mission vous a été assignée: "' . $this->assignedService->serviceRequest->subject . '"',
-            'action_url' => '/prestataire/assigned-services/' . $this->assignedService->id,
+            'provider_id' => $this->assignedService->provider_id,
+            'message' => 'Le prestataire ' . $this->assignedService->provider->name . ' a signalé la finalisation du service "' . $this->assignedService->serviceRequest->subject . '".',
+            'action_url' => '/up-fiesta-kygj/assigned-services/' . $this->assignedService->id,
         ];
     }
 }
-
-         

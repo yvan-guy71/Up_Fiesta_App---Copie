@@ -42,9 +42,30 @@
                     </div>
                     <div>
                         <label class="text-gray-600 text-sm font-semibold">Prix total</label>
-                        <p class="text-gray-800 text-lg font-bold">{{ number_format($booking->total_price, 2) }}€</p>
+                        <p class="text-gray-800 text-lg font-bold">{{ number_format($booking->total_price, 0, ',', ' ') }} CFA</p>
                     </div>
                 </div>
+
+                @if($booking->status === 'confirmed' && $booking->payment_status !== 'paid')
+                    <div class="mt-8 p-6 bg-indigo-50 rounded-2xl border border-indigo-100">
+                        <h3 class="text-lg font-bold text-indigo-900 mb-4">Procéder au paiement</h3>
+                        <p class="text-sm text-indigo-700 mb-6">Votre réservation a été confirmée ! Vous pouvez maintenant choisir votre mode de paiement préféré pour finaliser la commande.</p>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <a href="{{ route('payment.checkout', ['booking' => $booking->id, 'method' => 'tmoney']) }}" 
+                               class="flex items-center justify-center gap-3 px-6 py-4 bg-white border-2 border-indigo-200 rounded-xl hover:border-indigo-500 hover:bg-indigo-50 transition-all group">
+                                <img src="{{ asset('images/payments/tmoney.png') }}" alt="TMoney" class="h-8 w-auto">
+                                <span class="font-bold text-slate-700">TMoney</span>
+                            </a>
+                            <a href="{{ route('payment.checkout', ['booking' => $booking->id, 'method' => 'flooz']) }}" 
+                               class="flex items-center justify-center gap-3 px-6 py-4 bg-white border-2 border-indigo-200 rounded-xl hover:border-indigo-500 hover:bg-indigo-50 transition-all group">
+                                <img src="{{ asset('images/payments/flooz.png') }}" alt="Moov Money" class="h-8 w-auto">
+                                <span class="font-bold text-slate-700">Moov Money</span>
+                            </a>
+                        </div>
+                        <p class="text-[10px] text-center text-indigo-400 mt-4 uppercase tracking-widest font-bold">Sécurisé par PayGate Togo</p>
+                    </div>
+                @endif
             </div>
 
             <div>

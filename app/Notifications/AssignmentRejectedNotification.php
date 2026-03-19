@@ -8,7 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class ServiceAssignedNotification extends Notification implements ShouldQueue
+class AssignmentRejectedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -36,17 +36,16 @@ class ServiceAssignedNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         $serviceRequest = $this->assignedService->serviceRequest;
-        
+        $provider = $this->assignedService->provider;
+
         return (new MailMessage)
             ->greeting('Bonjour ' . $notifiable->name . ',')
-            ->line('Un nouveau service vous a été assigné !')
-            ->line('**Détails du service:**')
-            ->line('Sujet: ' . $serviceRequest->subject)
-            ->line('Description: ' . substr($serviceRequest->description, 0, 100) . '...')
-            ->line('Budget: ' . number_format($serviceRequest->budget, 2) . ' XOF')
-            ->line('Date: ' . $serviceRequest->event_date->format('d/m/Y H:i'))
-            ->action('Voir le détail', url('/prestataire/assigned-services/' . $this->assignedService->id))
-            ->line('Veuillez accepter ou refuser cette assignation dans votre espace professionnel.');
+            ->line('Malheureusement, le prestataire a refusé votre demande de service.')
+            ->line('**Détails:**')
+            ->line('Prestataire: ' . $provider->name)
+            ->line('Service: ' . $serviceRequest->subject)
+            ->when($this->assignedService->rejection_reason, fn ($message) => $message->line('**Raison du refus:** ' . $this->assignedService->rejection_reason))
+            ->line('Nous cherchons actuellement un autre prestataire pour réaliser votre demande. Vous serez notifié dès qu\'une nouvelle assignation sera faite.');
     }
 
     /**
@@ -59,14 +58,10 @@ class ServiceAssignedNotification extends Notification implements ShouldQueue
         return [
             'assigned_service_id' => $this->assignedService->id,
             'service_request_id' => $this->assignedService->service_request_id,
-            'subject' => $this->assignedService->serviceRequest->subject,
-            'client_name' => $this->assignedService->serviceRequest->user->name,
-            'budget' => $this->assignedService->serviceRequest->budget,
-            'event_date' => $this->assignedService->serviceRequest->event_date,
-            'message' => 'Une nouvelle mission vous a été assignée: "' . $this->assignedService->serviceRequest->subject . '"',
-            'action_url' => '/prestataire/assigned-services/' . $this->assignedService->id,
+            'provider_name' => $this->assignedService->provider->name,
+            'rejection_reason' => $this->assignedService->rejection_reason,
+            'message' => 'Le prestataire ' . $this->assignedService->provider->name . ' a refusé votre demande "' . $this->assignedService->serviceRequest->subject . '".',
+            'action_url' => '/mes-demandes/' . $this->assignedService->service_request_id,
         ];
     }
 }
-
-         

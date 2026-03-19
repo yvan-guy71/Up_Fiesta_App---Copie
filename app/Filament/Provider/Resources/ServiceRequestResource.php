@@ -4,12 +4,12 @@ namespace App\Filament\Provider\Resources;
 
 use App\Filament\Provider\Resources\ServiceRequestResource\Pages;
 use App\Models\ServiceRequest;
-use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 
 class ServiceRequestResource extends Resource
 {
@@ -20,6 +20,12 @@ class ServiceRequestResource extends Resource
     protected static ?string $navigationLabel = 'Demandes de Services';
 
     protected static ?string $modelLabel = 'Demande de Service';
+
+    public static function form(Form $form): Form
+    {
+        return $form
+            ->schema([]);
+    }
 
     public static function table(Table $table): Table
     {
@@ -73,27 +79,35 @@ class ServiceRequestResource extends Resource
                     ->icon('heroicon-o-check-circle')
                     ->color('info')
                     ->requiresConfirmation()
-                    ->visible(fn (ServiceRequest $record): bool => $record->status === 'pending')
+                    ->visible(fn (ServiceRequest $record): bool => $record->getAttribute('status') === 'pending')
                     ->action(fn (ServiceRequest $record) => $record->update(['status' => 'processed'])),
             ]);
     }
 
     public static function getEloquentQuery(): Builder
     {
-        $provider = auth()->user()->provider;
+        $provider = Auth::user()?->provider;
 
         if (!$provider) {
             return parent::getEloquentQuery()->whereRaw('1 = 0');
         }
 
+        // Show only service requests assigned to this provider by admin
         return parent::getEloquentQuery()
-            ->where('provider_id', $provider->id);
+            ->where(function (Builder $query) use ($provider) {
+                $query->where('provider_id', $provider->id)
+                    ->orWhereHas('assignedServices', function (Builder $q) use ($provider) {
+                        $q->where('provider_id', $provider->id);
+                    });
+            });
     }
 
     public static function getPages(): array
     {
         return [
             'index' => Pages\ManageServiceRequests::route('/'),
+            'view' => Pages\ViewServiceRequest::route('/{record}'),
         ];
     }
 }
+

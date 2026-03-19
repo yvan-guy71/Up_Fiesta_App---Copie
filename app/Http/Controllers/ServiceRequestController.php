@@ -59,9 +59,9 @@ class ServiceRequestController extends Controller
             'kind' => 'nullable|in:prestations,domestiques',
             'subject' => 'required|string|max:255',
             'description' => 'required|string',
-            'event_date' => 'nullable|date',
-            'location' => 'nullable|string|max:255',
-            'budget' => 'nullable|numeric|min:0',
+            'event_date' => 'required|date',
+            'location' => 'required|string|max:255',
+            'budget' => 'required|numeric|min:500',
         ];
 
         if ($type === 'event') {
@@ -115,6 +115,15 @@ class ServiceRequestController extends Controller
             $admins = User::where('role', 'admin')->get();
             if ($admins->isNotEmpty()) {
                 Notification::send($admins, new ServiceRequestCreatedNotification($serviceRequest, true));
+                
+                // Also send a message in the panel for each admin
+                foreach ($admins as $admin) {
+                    \App\Models\Message::create([
+                        'sender_id' => Auth::id(),
+                        'receiver_id' => $admin->id,
+                        'content' => "Nouvelle demande de " . ($type === 'event' ? "d'organisation d'événement" : "service") . " : " . $serviceRequest->subject . ". " . $description,
+                    ]);
+                }
             }
 
             // Provider will be notified only when admin assigns the service to them

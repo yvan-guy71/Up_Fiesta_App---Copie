@@ -11,6 +11,8 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#4f46e5">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -120,22 +122,21 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="space-y-2">
-                        <label for="event_date" class="text-sm font-bold text-slate-700 dark:text-slate-300">Date prévue (optionnel)</label>
-                        <input type="datetime-local" name="event_date" id="event_date" value="{{ old('event_date') }}" class="w-full bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-600 outline-none transition-all dark:text-white">
-                        @error('event_date') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-                    </div>
-
-                    <div class="space-y-2">
-                        <label for="location" class="text-sm font-bold text-slate-700 dark:text-slate-300">Lieu de l'événement (optionnel)</label>
-                        <input type="text" name="location" id="location" value="{{ old('location') }}" class="w-full bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-600 outline-none transition-all dark:text-white dark:placeholder-slate-400" placeholder="Ex: Lomé, Kpalimé...">
-                        @error('location') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-                    </div>
+                    <label for="event_date" class="text-sm font-bold text-slate-700 dark:text-slate-300">Date prévue <span class="text-rose-500">*</span></label>
+                    <input type="datetime-local" name="event_date" id="event_date" value="{{ old('event_date') }}" required class="w-full bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-600 outline-none transition-all dark:text-white">
+                    @error('event_date') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
                 <div class="space-y-2">
-                    <label for="budget" class="text-sm font-bold text-slate-700 dark:text-slate-300">Budget estimé (XOF - optionnel)</label>
-                    <input type="number" name="budget" id="budget" value="{{ old('budget') }}" class="w-full bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-600 outline-none transition-all dark:text-white dark:placeholder-slate-400" placeholder="Ex: 500000">
-                    @error('budget') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                    <label for="location" class="text-sm font-bold text-slate-700 dark:text-slate-300">Lieu de l'événement <span class="text-rose-500">*</span></label>
+                    <input type="text" name="location" id="location" value="{{ old('location') }}" required class="w-full bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-600 outline-none transition-all dark:text-white dark:placeholder-slate-400" placeholder="Ex: Lomé, Kpalimé...">
+                    @error('location') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <label for="budget" class="text-sm font-bold text-slate-700 dark:text-slate-300">Budget estimé (XOF) <span class="text-rose-500">*</span></label>
+                <input type="number" name="budget" id="budget" value="{{ old('budget') }}" required min="500" class="w-full bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-600 outline-none transition-all dark:text-white dark:placeholder-slate-400" placeholder="Ex: 500000">
                 </div>
 
                 <div class="pt-4">

@@ -305,7 +305,7 @@ class AssignedServiceResource extends Resource
 
         return parent::getEloquentQuery()
             ->where('provider_id', $provider?->id)
-            ->with(['serviceRequest.user', 'serviceRequest.category', 'admin']);
+            ->with(['serviceRequest.user', 'admin']);
     }
 
     public static function getPages(): array

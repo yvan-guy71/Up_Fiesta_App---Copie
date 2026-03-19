@@ -56,7 +56,7 @@ class ViewAssignedService extends ViewRecord
                             ->icon('heroicon-m-envelope'),
                         Infolists\Components\TextEntry::make('admin.name')
                             ->label('Assigné par')
-                            ->icon('heroicon-m-user-check'),
+                            ->icon('heroicon-m-check-badge'),
                         Infolists\Components\TextEntry::make('assigned_at')
                             ->label('Date d\'assignation')
                             ->dateTime('d/m/Y H:i')

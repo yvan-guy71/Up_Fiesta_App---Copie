@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Conversation avec {{ $contact->name }} - Up Fiesta</title>
     
     <!-- Favicon -->
@@ -11,44 +11,71 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#4f46e5">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <script src="https://cdn.tailwindcss.com"></script>
+    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @else
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script>
+            tailwind.config = { darkMode: 'class' };
+        </script>
+    @endif
+    <style>
+        html.dark body { background-color: #020617; color: #e5e7eb; }
+        html.dark .bg-white { background-color: #1a1f2e; }
+        html.dark .bg-slate-50 { background-color: #1e293b; }
+        html.dark .border-slate-100 { border-color: #334155; }
+        html.dark .text-slate-900 { color: #f1f5f9; }
+        html.dark .text-slate-600 { color: #cbd5e1; }
+        html.dark .text-slate-700 { color: #cbd5e1; }
+        html.dark .text-slate-500 { color: #94a3b8; }
+        html.dark input, html.dark select, html.dark textarea {
+            background-color: #1e293b !important;
+            color: #f1f5f9 !important;
+            border-color: #334155 !important;
+        }
+        html.dark input::placeholder, html.dark textarea::placeholder { color: #64748b; }
+    </style>
 </head>
-<body class="bg-gray-50 h-screen flex flex-col">
+<body class="bg-slate-50 dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-100 h-screen flex flex-col">
     <x-flash-messages />
-    <header class="bg-white shadow-sm p-4 flex items-center justify-between">
-        <div class="flex items-center gap-4">
-            <a href="{{ route('messages.index') }}" class="text-gray-500 hover:text-gray-700">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
+    <header class="bg-white dark:bg-slate-800 shadow-sm sticky top-0 z-50 border-b dark:border-slate-700">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <a href="{{ route('home') }}" class="flex items-center gap-2">
+                <img src="{{ asset('images/logo.png') }}" alt="Up Fiesta Logo" class="h-10 w-auto">
             </a>
-            <div class="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center font-bold">
-                {{ substr($contact->name, 0, 1) }}
+            <div class="flex items-center gap-4">
+                <a href="{{ route('messages.index') }}" class="text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:underline">← Mes messages</a>
+                @include('partials.notifications')
             </div>
-            <h1 class="font-bold text-lg">{{ $contact->name }}</h1>
-        </div>
-        <div class="flex items-center gap-3">
-            <form method="POST" action="{{ route('messages.conversation.destroy', $contact->id) }}" onsubmit="return confirm('Supprimer toute la discussion avec {{ $contact->name }} ?');">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="text-xs font-bold text-red-500 hover:text-red-600 flex items-center gap-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                    Supprimer la discussion
-                </button>
-            </form>
-            <a href="{{ route('home') }}" class="text-indigo-600 hover:text-indigo-800 text-sm font-bold flex items-center gap-1">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                </svg>
-                Accueil
-            </a>
-        </div>
+        </nav>
     </header>
 
-    <main class="flex-1 overflow-y-auto p-4 space-y-4">
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <div class="bg-white dark:bg-slate-800 shadow-sm p-4 flex items-center justify-between border-b dark:border-slate-700">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-400 rounded-full flex items-center justify-center font-bold">
+                    {{ substr($contact->name, 0, 1) }}
+                </div>
+                <h1 class="font-bold text-lg text-slate-900 dark:text-white">{{ $contact->name }}</h1>
+            </div>
+            <div class="flex items-center gap-3">
+                <form method="POST" action="{{ route('messages.conversation.destroy', $contact->id) }}" onsubmit="return confirm('Supprimer toute la discussion avec {{ $contact->name }} ?');">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="text-xs font-bold text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 flex items-center gap-1 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        Supprimer la discussion
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    <main class="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 dark:bg-slate-900">
         @foreach($messages as $message)
             @php
                 $sender = $message->sender;
@@ -62,10 +89,10 @@
             <div class="flex {{ $isMe ? 'justify-end' : 'justify-start' }}">
                 <div class="max-w-[85%] sm:max-w-[70%]">
                     <div class="flex items-center gap-2 mb-1 {{ $isMe ? 'justify-end' : 'justify-start' }}">
-                        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{{ $senderName }}</span>
-                        <span class="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 font-medium">{{ $senderRole }}</span>
+                        <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ $senderName }}</span>
+                        <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-medium">{{ $senderRole }}</span>
                     </div>
-                    <div class="relative group p-4 rounded-2xl {{ $isMe ? 'bg-indigo-600 text-white rounded-br-none' : 'bg-white text-gray-900 rounded-bl-none shadow-sm' }}">
+                    <div class="relative group p-4 rounded-2xl {{ $isMe ? 'bg-indigo-600 text-white rounded-br-none' : 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-bl-none shadow-sm' }}">
                         @if($message->provider_id && $message->provider)
                             <div class="mb-3 p-3 bg-white/10 rounded-xl border border-white/20">
                                 <div class="flex items-center gap-3 mb-3">
@@ -120,7 +147,7 @@
         @endforeach
     </main>
 
-    <footer class="bg-white p-4 border-t border-gray-100">
+    <footer class="bg-white dark:bg-slate-800 p-4 border-t border-slate-100 dark:border-slate-700 flex-shrink-0">
         @if(auth()->user()->role === 'admin' && $contact->role === 'client')
             <div class="mb-4">
                 <button type="button" onclick="toggleProviderList()" class="flex items-center gap-2 text-xs font-bold text-indigo-600 bg-indigo-50 px-4 py-2 rounded-xl hover:bg-indigo-100 transition-all">
@@ -166,7 +193,7 @@
         <form id="message-form" action="{{ route('messages.store', $contact->id) }}" method="POST" class="flex gap-4">
             @csrf
             <input type="hidden" id="provider-id-input" name="provider_id" value="{{ request('needs_provider') }}">
-            <textarea name="content" id="message-input" rows="1" class="flex-1 bg-gray-100 border-none rounded-2xl px-4 py-3 focus:ring-2 focus:ring-indigo-600 outline-none resize-none transition-all" placeholder="Tapez votre message ici...">{{ $prefillMessage ?? '' }}</textarea>
+            <textarea name="content" id="message-input" rows="1" class="flex-1 bg-slate-100 dark:bg-slate-700 border-none rounded-2xl px-4 py-3 focus:ring-2 focus:ring-indigo-600 outline-none resize-none transition-all text-slate-900 dark:text-white" placeholder="Tapez votre message ici...">{{ $prefillMessage ?? '' }}</textarea>
             <button type="submit" class="bg-indigo-600 text-white p-3 rounded-full hover:bg-indigo-700 transition">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
@@ -174,6 +201,7 @@
             </button>
         </form>
     </footer>
+    </div>
 
     <script>
         function toggleProviderList() {

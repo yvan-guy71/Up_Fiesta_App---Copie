@@ -50,8 +50,8 @@
                 @php
                     $contactUrl = route('login');
                     if (auth()->check()) {
-                        // Redirection vers la messagerie avec le client
-                        $contactUrl = route('messages.show', ['user' => auth()->id()]);
+                        // Redirection vers la messagerie avec Up Fiesta (Admin ID 1) pas le prestataire
+                        $contactUrl = route('messages.show', ['user' => 1, 'needs_provider' => $provider->id]);
                     }
                 @endphp
                 <a href="{{ $contactUrl }}" class="p-2 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition" title="Exprimer mes besoins">
