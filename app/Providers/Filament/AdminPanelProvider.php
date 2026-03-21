@@ -55,6 +55,7 @@ class AdminPanelProvider extends PanelProvider
                 \App\Filament\Widgets\ServiceRequestStatsOverview::class,
                 \App\Filament\Widgets\PendingPayoutsOverview::class,
                 \App\Filament\Widgets\LatestServiceRequests::class,
+                \App\Filament\Widgets\PendingVerifications::class,
                 \App\Filament\Widgets\PendingPayouts::class,
             ])
             ->navigationItems([

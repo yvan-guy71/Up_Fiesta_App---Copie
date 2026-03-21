@@ -37,24 +37,24 @@
         <div class="absolute inset-0 bg-grid-slate-200/50 [mask-image:linear-gradient(0deg,transparent,black,transparent)] dark:bg-grid-slate-700/20 dark:[mask-image:linear-gradient(0deg,transparent,rgba(255,255,255,0.1),transparent)]"></div>
         <div class="max-w-5xl mx-auto px-4 relative z-10">
             <div class="text-center mb-8">
-                <h1 class="text-3xl font-black text-slate-900 dark:text-white mb-2 tracking-tight">{{ __('messages.search.title') }}</h1>
-                <p class="text-slate-500 dark:text-slate-400 font-medium">{{ __('messages.search.subtitle') }}</p>
+                <h1 class="text-3xl font-black text-slate-900 dark:text-black mb-2 tracking-tight">{{ __('messages.search.title') }}</h1>
+                <p class="text-slate-600 dark:text-slate-600 font-medium">{{ __('messages.search.subtitle') }}</p>
             </div>
             <form action="{{ route('search') }}" method="GET" class="flex flex-col gap-6">
                 <div class="flex flex-col xl:flex-row gap-4 p-2">
                     <!-- Search Input -->
-                    <div class="flex-1 flex items-center bg-white dark:bg-slate-800 px-6 py-4 rounded-[1.5rem] shadow-sm border border-slate-200/50 dark:border-slate-700/50 focus-within:ring-4 focus-within:ring-indigo-500/10 transition-all">
+                    <div class="flex-1 flex items-center bg-slate-500 dark:bg-slate-800 px-6 py-4 rounded-[1.5rem] shadow-sm border border-slate-200/50 dark:border-slate-700/50 focus-within:ring-4 focus-within:ring-indigo-500/10 transition-all">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
-                        <input type="text" name="q" value="{{ request('q') }}" placeholder="{{ __('messages.search.placeholder') }}" class="flex-1 ml-3 bg-transparent border-none outline-none focus:ring-0 text-slate-900 dark:text-white placeholder-slate-400 font-bold">
+                        <input type="text" name="q" value="{{ request('q') }}" placeholder="{{ __('messages.search.placeholder') }}" class="flex-1 ml-3 border-none outline-none focus:ring-0 text-slate-800 dark:text-white placeholder-slate-800 dark:placeholder-slate-400 font-bold">
                     </div>
 
                     <div class="flex flex-col md:flex-row gap-2 flex-1 xl:flex-none">
                         <!-- Category Filter -->
                         <div class="xl:w-56">
-                            <select name="category" class="w-full h-full px-6 py-4 bg-white dark:bg-slate-800 border border-slate-200/50 dark:border-slate-700/50 rounded-[1.5rem] text-slate-900 dark:text-white focus:ring-4 focus:ring-indigo-500/10 transition-all font-bold appearance-none shadow-sm">
-                                <option value="" class="text-slate-500">{{ __('messages.search.all_categories') }}</option>
+                            <select name="category" class="w-full h-full px-6 py-4 dark:bg-slate-800 border border-slate-200/50 dark:border-slate-700/50 rounded-[1.5rem] text-slate-900 dark:text-slate-200 focus:ring-4 focus:ring-indigo-500/10 transition-all font-bold appearance-none shadow-sm">
+                                <option value="" class="text-slate-700 dark:text-slate-400">{{ __('messages.search.all_categories') }}</option>
                                 @foreach($searchCategories as $category)
                                     <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
                                         {{ __('messages.categories_list.' . $category->slug) ?: $category->name }}
@@ -65,8 +65,8 @@
 
                         <!-- City Filter -->
                         <div class="xl:w-56">
-                            <select name="city" class="w-full h-full px-6 py-4 bg-white dark:bg-slate-800 border border-slate-200/50 dark:border-slate-700/50 rounded-[1.5rem] text-slate-900 dark:text-white focus:ring-4 focus:ring-indigo-500/10 transition-all font-bold appearance-none shadow-sm">
-                                <option value="" class="text-slate-500">{{ __('messages.search.all_cities') }}</option>
+                            <select name="city" class="w-full h-full px-6 py-4 dark:bg-slate-800 border border-slate-200/50 dark:border-slate-700/50 rounded-[1.5rem] text-slate-900 dark:text-slate-200 focus:ring-4 focus:ring-indigo-500/10 transition-all font-bold appearance-none shadow-sm">
+                                <option value="" class="text-slate-700 dark:text-slate-400">{{ __('messages.search.all_cities') }}</option>
                                 @foreach($cities as $city)
                                     <option value="{{ $city->id }}" {{ request('city') == $city->id ? 'selected' : '' }}>
                                         {{ __('messages.cities_list.' . \Illuminate\Support\Str::slug($city->name)) ?: $city->name }}
@@ -88,15 +88,15 @@
                 <!-- Kind Filter -->
                 <div class="flex flex-wrap justify-center gap-3">
                     <a href="{{ route('search', request()->except(['kind'])) }}" 
-                       class="px-6 py-2.5 rounded-full text-sm font-black transition-all {{ !request('kind') ? 'bg-slate-900 text-white shadow-lg' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500 shadow-sm' }}">
+                       class="px-6 py-2.5 rounded-full text-sm font-black transition-all {{ !request('kind') ? 'bg-indigo-600 text-white shadow-lg' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500 shadow-sm' }}">
                         {{ __('messages.search.all_types') }}
                     </a>
                     <a href="{{ route('search', array_merge(request()->all(), ['kind' => 'prestations'])) }}" 
-                       class="px-6 py-2.5 rounded-full text-sm font-black transition-all {{ request('kind') === 'prestations' ? 'bg-indigo-600 text-white shadow-lg' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-indigo-400 shadow-sm' }}">
+                       class="px-6 py-2.5 rounded-full text-sm font-black transition-all {{ request('kind') === 'prestations' ? 'bg-indigo-600 text-white shadow-lg' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-indigo-400 shadow-sm' }}">
                         {{ __('messages.categories.kind_prestations') }}
                     </a>
                     <a href="{{ route('search', array_merge(request()->all(), ['kind' => 'domestiques'])) }}" 
-                       class="px-6 py-2.5 rounded-full text-sm font-black transition-all {{ request('kind') === 'domestiques' ? 'bg-indigo-600 text-white shadow-lg' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-indigo-400 shadow-sm' }}">
+                       class="px-6 py-2.5 rounded-full text-sm font-black transition-all {{ request('kind') === 'domestiques' ? 'bg-indigo-600 text-white shadow-lg' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-indigo-400 shadow-sm' }}">
                         {{ __('messages.categories.kind_domestiques') }}
                     </a>
                 </div>
@@ -109,7 +109,7 @@
         <!-- Results Header -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
             <div>
-                <h2 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                <h2 class="text-3xl font-black text-black tracking-tight">
                     @if(request('q') || request('category') || request('city') || request('kind'))
                         {{ __('messages.search.results_for') }} 
                         <span class="text-indigo-600 dark:text-indigo-400">
@@ -119,7 +119,7 @@
                         {{ __('messages.search.results') }}
                     @endif
                 </h2>
-                <p class="text-slate-500 dark:text-slate-400 mt-2 font-bold">
+                <p class="text-slate-600 dark:text-slate-400 mt-2 font-bold">
                     @if($providers->total() === 1)
                         {{ __('messages.search.count_single') }}
                     @else
@@ -176,13 +176,13 @@
                 <div class="absolute bottom-0 left-0 -mb-20 -ml-20 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl"></div>
                 
                 <div class="relative z-10 max-w-lg mx-auto text-center">
-                    <div class="w-24 h-24 bg-white dark:bg-slate-800 text-indigo-500 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-xl shadow-indigo-100 dark:shadow-none border border-slate-100 dark:border-slate-700 rotate-3">
+                    <div class="w-24 h-24 bg-white dark:bg-slate-800 text-indigo-500 rounded-3xl flex items-center justify-center mx-auto mb-8 border border-slate-100 dark:border-slate-700 rotate-3">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
                     </div>
                     <h2 class="text-3xl font-black text-slate-900 dark:text-white mb-4 tracking-tight">{{ __('messages.search.empty_title') }}</h2>
-                    <p class="text-slate-500 dark:text-slate-400 mb-10 text-lg leading-relaxed">{{ __('messages.search.empty_subtitle') }}</p>
+                    <p class="text-slate-600 dark:text-slate-400 mb-10 text-lg leading-relaxed">{{ __('messages.search.empty_subtitle') }}</p>
                     <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
                         <a href="{{ route('home') }}" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-2xl font-black transition shadow-lg shadow-indigo-200 dark:shadow-none">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

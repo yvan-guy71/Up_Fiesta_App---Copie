@@ -67,45 +67,69 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
-                    @forelse($bookings as $booking)
+                    @forelse($allReservations as $item)
+                        @php
+                            $isBooking = $item instanceof \App\Models\Booking;
+                            $isAssignedService = $item instanceof \App\Models\AssignedService;
+                            
+                            $provider = $isBooking ? $item->provider : $item->provider;
+                            $eventDate = $isBooking ? $item->event_date : $item->serviceRequest->event_date;
+                            $price = $isBooking ? $item->total_price : ($item->serviceRequest->budget ?? $item->provider->base_price ?? 0);
+                            $status = $isBooking ? $item->status : $item->status;
+                            $paymentStatus = $isBooking ? $item->payment_status : null;
+                            $itemId = $item->id;
+                        @endphp
                         <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
                             <td class="px-6 py-5">
-                                <div class="font-bold text-slate-900 dark:text-white">{{ $booking->provider->name }}</div>
-                                <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">{{ $booking->provider->category->name }}</div>
+                                <div class="font-bold text-slate-900 dark:text-white">{{ $provider->name }}</div>
+                                <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">{{ $provider->category->name ?? 'Services' }}</div>
                             </td>
                             <td class="px-6 py-5 text-slate-600 dark:text-slate-400">
-                                {{ $booking->event_date->format('d/m/Y') }}
+                                {{ $eventDate->format('d/m/Y') }}
                             </td>
                             <td class="px-6 py-5 font-bold text-slate-900 dark:text-white">
-                                {{ number_format($booking->total_price, 0, ',', ' ') }} XOF
+                                {{ number_format($price, 0, ',', ' ') }} XOF
                             </td>
                             <td class="px-6 py-5">
                                 <div class="flex flex-col gap-2">
                                     <span class="px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest w-fit
-                                        @if($booking->status == 'pending') bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400
-                                        @elseif($booking->status == 'confirmed') bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400
-                                        @elseif($booking->status == 'cancelled') bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400
+                                        @if($status == 'pending') bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400
+                                        @elseif($status == 'confirmed' || $status == 'accepted') bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400
+                                        @elseif($status == 'cancelled' || $status == 'rejected') bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400
+                                        @elseif($status == 'completed') bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400
                                         @else bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 @endif">
-                                        {{ ucfirst($booking->status) }}
+                                        @if($isAssignedService && $status == 'accepted')
+                                            Acceptée - À réserver
+                                        @else
+                                            {{ ucfirst($status) }}
+                                        @endif
                                     </span>
-                                    @if($booking->payment_status == 'paid')
+                                    @if($isBooking && $paymentStatus == 'paid')
                                         <span class="px-3 py-1 rounded-full text-[10px] font-black bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 uppercase tracking-widest w-fit">PAYÉ</span>
-                                    @elseif($booking->payment_status == 'pending')
+                                    @elseif($isBooking && $paymentStatus == 'pending')
                                         <span class="px-3 py-1 rounded-full text-[10px] font-black bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 uppercase tracking-widest w-fit">EN ATTENTE</span>
                                     @endif
                                 </div>
                             </td>
                             <td class="px-6 py-5">
                                 <div class="flex flex-wrap gap-2">
-                                    @if($booking->payment_status == 'unpaid' && $booking->status != 'cancelled')
-                                        <a href="{{ route('payment.checkout', ['booking' => $booking->id, 'method' => 'tmoney']) }}" class="text-xs bg-yellow-400 dark:bg-yellow-600 text-yellow-900 dark:text-yellow-100 px-3 py-1.5 rounded-lg font-bold hover:shadow-md transition-all">T-Money</a>
-                                        <a href="{{ route('payment.checkout', ['booking' => $booking->id, 'method' => 'flooz']) }}" class="text-xs bg-blue-600 dark:bg-blue-700 text-white px-3 py-1.5 rounded-lg font-bold hover:shadow-md transition-all">Flooz</a>
-                                        <a href="{{ route('payment.checkout', ['booking' => $booking->id, 'method' => 'card']) }}" class="text-xs bg-indigo-600 dark:bg-indigo-700 text-white px-3 py-1.5 rounded-lg font-bold hover:shadow-md transition-all">Carte</a>
+                                    @if($isBooking)
+                                        @if($item->payment_status == 'unpaid' && $item->status != 'cancelled')
+                                            <a href="{{ route('payment.checkout', ['booking' => $item->id, 'method' => 'tmoney']) }}" class="text-xs bg-yellow-400 dark:bg-yellow-600 text-yellow-900 dark:text-yellow-100 px-3 py-1.5 rounded-lg font-bold hover:shadow-md transition-all">T-Money</a>
+                                            <a href="{{ route('payment.checkout', ['booking' => $item->id, 'method' => 'flooz']) }}" class="text-xs bg-blue-600 dark:bg-blue-700 text-white px-3 py-1.5 rounded-lg font-bold hover:shadow-md transition-all">Flooz</a>
+                                            <a href="{{ route('payment.checkout', ['booking' => $item->id, 'method' => 'card']) }}" class="text-xs bg-indigo-600 dark:bg-indigo-700 text-white px-3 py-1.5 rounded-lg font-bold hover:shadow-md transition-all">Carte</a>
+                                        @endif
+                                        @if($item->payment_status == 'pending')
+                                            <span class="text-xs text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 px-3 py-1.5 rounded-lg font-bold">Validation en cours</span>
+                                        @endif
+                                        <a href="{{ route('service-requests.create', ['provider_id' => $item->provider->id]) }}" class="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-bold px-3 py-1.5 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-all">Nouveau besoin</a>
+                                    @elseif($isAssignedService)
+                                        <a href="{{ route('bookings.show', $item->id) }}" class="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-bold px-3 py-1.5 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-all">Voir détails</a>
+                                        <form action="{{ route('bookings.createFromAssignedService', $item->id) }}" method="POST" style="display:inline;">
+                                            @csrf
+                                            <button type="submit" class="text-xs bg-green-600 dark:bg-green-700 text-white px-3 py-1.5 rounded-lg font-bold hover:shadow-md transition-all">Réserver</button>
+                                        </form>
                                     @endif
-                                    @if($booking->payment_status == 'pending')
-                                        <span class="text-xs text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 px-3 py-1.5 rounded-lg font-bold">Validation en cours</span>
-                                    @endif
-                                    <a href="{{ route('service-requests.create', ['provider_id' => $booking->provider->id]) }}" class="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-bold px-3 py-1.5 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-all">Nouveau besoin</a>
                                 </div>
                             </td>
                         </tr>
@@ -127,79 +151,103 @@
 
         <!-- Mobile Card View -->
         <div class="md:hidden space-y-4">
-            @forelse($bookings as $booking)
+            @forelse($allReservations as $item)
+                @php
+                    $isBooking = $item instanceof \App\Models\Booking;
+                    $isAssignedService = $item instanceof \App\Models\AssignedService;
+                    
+                    $provider = $isBooking ? $item->provider : $item->provider;
+                    $eventDate = $isBooking ? $item->event_date : $item->serviceRequest->event_date;
+                    $price = $isBooking ? $item->total_price : ($item->serviceRequest->budget ?? $item->provider->base_price ?? 0);
+                    $status = $isBooking ? $item->status : $item->status;
+                    $paymentStatus = $isBooking ? $item->payment_status : null;
+                    $review = $isBooking ? $item->review : null;
+                @endphp
                 <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm dark:shadow-xl dark:shadow-slate-900/50 border border-slate-100 dark:border-slate-700 overflow-hidden p-5 space-y-4">
                     <!-- Provider Info -->
                     <div>
-                        <h3 class="font-black text-slate-900 dark:text-white text-lg">{{ $booking->provider->name }}</h3>
-                        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">{{ $booking->provider->category->name }}</p>
+                        <h3 class="font-black text-slate-900 dark:text-white text-lg">{{ $provider->name }}</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">{{ $provider->category->name ?? 'Services' }}</p>
                     </div>
 
                     <!-- Date and Price -->
                     <div class="grid grid-cols-2 gap-4 pt-3 border-t border-slate-100 dark:border-slate-700">
                         <div>
                             <p class="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mb-1">Date prévue</p>
-                            <p class="text-lg font-bold text-slate-900 dark:text-white">{{ $booking->event_date->format('d/m/Y') }}</p>
+                            <p class="text-lg font-bold text-slate-900 dark:text-white">{{ $eventDate->format('d/m/Y') }}</p>
                         </div>
                         <div class="text-right">
                             <p class="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mb-1">Prix total</p>
-                            <p class="text-lg font-black text-indigo-600 dark:text-indigo-400">{{ number_format($booking->total_price, 0, ',', ' ') }} XOF</p>
+                            <p class="text-lg font-black text-indigo-600 dark:text-indigo-400">{{ number_format($price, 0, ',', ' ') }} XOF</p>
                         </div>
                     </div>
 
                     <!-- Status -->
                     <div class="flex flex-wrap gap-2 pt-3 border-t border-slate-100 dark:border-slate-700">
                         <span class="px-3 py-1.5 rounded-full text-xs font-black uppercase tracking-widest
-                            @if($booking->status == 'pending') bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400
-                            @elseif($booking->status == 'confirmed') bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400
-                            @elseif($booking->status == 'cancelled') bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400
+                            @if($status == 'pending') bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400
+                            @elseif($status == 'confirmed' || $status == 'accepted') bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400
+                            @elseif($status == 'cancelled' || $status == 'rejected') bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400
+                            @elseif($status == 'completed') bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400
                             @else bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 @endif">
-                            {{ ucfirst($booking->status) }}
+                            @if($isAssignedService && $status == 'accepted')
+                                Acceptée - À réserver
+                            @else
+                                {{ ucfirst($status) }}
+                            @endif
                         </span>
-                        @if($booking->payment_status == 'paid')
+                        @if($isBooking && $paymentStatus == 'paid')
                             <span class="px-3 py-1.5 rounded-full text-xs font-black bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 uppercase tracking-widest">PAYÉ</span>
-                        @elseif($booking->payment_status == 'pending')
+                        @elseif($isBooking && $paymentStatus == 'pending')
                             <span class="px-3 py-1.5 rounded-full text-xs font-black bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 uppercase tracking-widest">EN ATTENTE</span>
                         @endif
                     </div>
 
                     <!-- Actions -->
                     <div class="space-y-3 pt-3 border-t border-slate-100 dark:border-slate-700">
-                        @if($booking->payment_status == 'unpaid' && $booking->status != 'cancelled')
-                            <div class="space-y-2">
-                                <p class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Payer maintenant</p>
-                                <div class="grid grid-cols-3 gap-2">
-                                    <a href="{{ route('payment.checkout', ['booking' => $booking->id, 'method' => 'tmoney']) }}" class="text-xs bg-yellow-400 dark:bg-yellow-600 text-yellow-900 dark:text-yellow-100 px-3 py-2 rounded-lg font-bold hover:shadow-md transition-all text-center">T-Money</a>
-                                    <a href="{{ route('payment.checkout', ['booking' => $booking->id, 'method' => 'flooz']) }}" class="text-xs bg-blue-600 dark:bg-blue-700 text-white px-3 py-2 rounded-lg font-bold hover:shadow-md transition-all text-center">Flooz</a>
-                                    <a href="{{ route('payment.checkout', ['booking' => $booking->id, 'method' => 'card']) }}" class="text-xs bg-indigo-600 dark:bg-indigo-700 text-white px-3 py-2 rounded-lg font-bold hover:shadow-md transition-all text-center">Carte</a>
-                                </div>
-                                <p class="text-[10px] text-slate-500 dark:text-slate-400 italic">Après redirection, suivez les instructions PayGate.</p>
-                            </div>
-                        @endif
-                        @if($booking->payment_status == 'pending')
-                            <p class="text-xs text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 px-3 py-2 rounded-lg font-bold">Votre paiement est en cours de validation (jusqu'à 15 min).</p>
-                        @endif
-
-                        <a href="{{ route('service-requests.create', ['provider_id' => $booking->provider->id]) }}" class="block w-full text-center text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-bold px-4 py-2 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-all">Exprimer un nouveau besoin</a>
-
-                        @if($booking->status === 'completed')
-                            @if($booking->review)
-                                <p class="text-xs text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 px-3 py-2 rounded-lg font-bold text-center">Avis déjà envoyé. Merci !</p>
-                            @else
-                                <form action="{{ route('reviews.store', $booking->id) }}" method="POST" class="space-y-2">
-                                    @csrf
-                                    <label for="rating-{{ $booking->id }}" class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest block">Laisser un avis</label>
-                                    <div class="grid grid-cols-2 gap-2">
-                                        <select id="rating-{{ $booking->id }}" name="rating" class="text-xs border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                            @for($i = 5; $i >= 1; $i--)
-                                                <option value="{{ $i }}">{{ $i }} ★</option>
-                                            @endfor
-                                        </select>
-                                        <button type="submit" class="text-xs bg-indigo-600 dark:bg-indigo-700 text-white px-3 py-2 rounded-lg font-bold hover:shadow-md transition-all">Envoyer</button>
+                        @if($isBooking)
+                            @if($item->payment_status == 'unpaid' && $item->status != 'cancelled')
+                                <div class="space-y-2">
+                                    <p class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Payer maintenant</p>
+                                    <div class="grid grid-cols-3 gap-2">
+                                        <a href="{{ route('payment.checkout', ['booking' => $item->id, 'method' => 'tmoney']) }}" class="text-xs bg-yellow-400 dark:bg-yellow-600 text-yellow-900 dark:text-yellow-100 px-3 py-2 rounded-lg font-bold hover:shadow-md transition-all text-center">T-Money</a>
+                                        <a href="{{ route('payment.checkout', ['booking' => $item->id, 'method' => 'flooz']) }}" class="text-xs bg-blue-600 dark:bg-blue-700 text-white px-3 py-2 rounded-lg font-bold hover:shadow-md transition-all text-center">Flooz</a>
+                                        <a href="{{ route('payment.checkout', ['booking' => $item->id, 'method' => 'card']) }}" class="text-xs bg-indigo-600 dark:bg-indigo-700 text-white px-3 py-2 rounded-lg font-bold hover:shadow-md transition-all text-center">Carte</a>
                                     </div>
-                                    <input type="text" name="comment" placeholder="Votre avis (optionnel)" class="w-full text-xs border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-slate-400 dark:placeholder-slate-500" />
-                                </form>
+                                    <p class="text-[10px] text-slate-500 dark:text-slate-400 italic">Après redirection, suivez les instructions PayGate.</p>
+                                </div>
                             @endif
+                            @if($item->payment_status == 'pending')
+                                <p class="text-xs text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 px-3 py-2 rounded-lg font-bold">Votre paiement est en cours de validation (jusqu'à 15 min).</p>
+                            @endif
+
+                            <a href="{{ route('service-requests.create', ['provider_id' => $item->provider->id]) }}" class="block w-full text-center text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-bold px-4 py-2 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-all">Exprimer un nouveau besoin</a>
+
+                            @if($item->status === 'completed')
+                                @if($review)
+                                    <p class="text-xs text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 px-3 py-2 rounded-lg font-bold text-center">Avis déjà envoyé. Merci !</p>
+                                @else
+                                    <form action="{{ route('reviews.store', $item->id) }}" method="POST" class="space-y-2">
+                                        @csrf
+                                        <label for="rating-{{ $item->id }}" class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest block">Laisser un avis</label>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <select id="rating-{{ $item->id }}" name="rating" class="text-xs border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                                @for($i = 5; $i >= 1; $i--)
+                                                    <option value="{{ $i }}">{{ $i }} ★</option>
+                                                @endfor
+                                            </select>
+                                            <button type="submit" class="text-xs bg-indigo-600 dark:bg-indigo-700 text-white px-3 py-2 rounded-lg font-bold hover:shadow-md transition-all">Envoyer</button>
+                                        </div>
+                                        <input type="text" name="comment" placeholder="Votre avis (optionnel)" class="w-full text-xs border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-slate-400 dark:placeholder-slate-500" />
+                                    </form>
+                                @endif
+                            @endif
+                        @elseif($isAssignedService)
+                            <a href="{{ route('bookings.show', $item->id) }}" class="block w-full text-center text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-bold px-4 py-2 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-all">Voir détails</a>
+                            <form action="{{ route('bookings.createFromAssignedService', $item->id) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="block w-full text-center text-white bg-green-600 dark:bg-green-700 hover:bg-green-700 dark:hover:bg-green-800 font-bold px-4 py-2 rounded-lg transition-all">Réserver maintenant</button>
+                            </form>
                         @endif
                     </div>
                 </div>
@@ -217,7 +265,7 @@
 
         <!-- Pagination -->
         <div class="mt-8">
-            {{ $bookings->links() }}
+            {{ $allReservations->links() }}
         </div>
     </main>
 </body>

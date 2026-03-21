@@ -39,8 +39,18 @@ class BookingResource extends Resource
                 Tables\Columns\IconColumn::make('provider_done')->label('Prestataire')
                     ->boolean()
                     ->tooltip(fn (Booking $r) => $r->provider_done ? 'A indiqué terminé' : 'En cours'),
+                Tables\Columns\IconColumn::make('require_client_review')->label('Notation demandée')
+                    ->boolean(),
+                Tables\Columns\IconColumn::make('review.id')->label('Noté')
+                    ->boolean()
+                    ->state(fn (Booking $r) => $r->review()->exists()),
+                Tables\Columns\TextColumn::make('admin_verification_status')->label('Vérification')->badge()
+                    ->color(fn (string $state) => match ($state) {
+                        'verified' => 'success', 'pending' => 'warning', default => 'gray',
+                    }),
                 Tables\Columns\TextColumn::make('platform_fee')->label('Frais')->money('XOF'),
                 Tables\Columns\TextColumn::make('provider_amount')->label('À verser')->money('XOF'),
+                Tables\Columns\TextColumn::make('provider_commission_reduction')->label('Réduction')->money('XOF'),
                 Tables\Columns\TextColumn::make('payout_status')->label('Versement')->badge()
                     ->color(fn (string $state) => match ($state) { 'paid' => 'success', 'pending' => 'warning', default => 'gray' }),
             ])
@@ -76,12 +86,30 @@ class BookingResource extends Resource
                             ->success()
                             ->send();
                     }),
+                Tables\Actions\Action::make('verify_by_admin')
+                    ->label('Vérifier le travail')
+                    ->icon('heroicon-o-shield-check')
+                    ->color('warning')
+                    ->requiresConfirmation()
+                    ->modalHeading('Vérifier le travail du prestataire')
+                    ->modalDescription('Cette action appliquera une réduction de 15% au montant du prestataire et marquera la tâche comme vérifiée.')
+                    ->visible(fn (Booking $r) => $r->status === 'confirmed' && $r->payment_status === 'paid' && $r->provider_done && $r->admin_verification_status === 'pending')
+                    ->action(function (Booking $r) {
+                        $reviewService = app(\App\Services\BookingReviewService::class);
+                        $reviewService->verifyBookingByAdmin($r, auth()->id(), true);
+                        
+                        \Filament\Notifications\Notification::make()
+                            ->title('Travail vérifié')
+                            ->body('Le travail du prestataire a été vérifié. Une réduction de 15% a été appliquée.')
+                            ->success()
+                            ->send();
+                    }),
                 Tables\Actions\Action::make('complete_and_payout')
                     ->label('Terminer et payer le prestataire')
                     ->icon('heroicon-o-check-badge')
                     ->color('success')
                     ->requiresConfirmation()
-                    ->visible(fn (Booking $r) => $r->status === 'confirmed' && $r->payment_status === 'paid' && $r->provider_done && $r->payout_status !== 'paid')
+                    ->visible(fn (Booking $r) => $r->status === 'confirmed' && $r->payment_status === 'paid' && $r->provider_done && $r->payout_status !== 'paid' && $r->admin_verification_status === 'verified')
                     ->action(function (Booking $r) {
                         $r->update(['status' => 'completed']);
                         PayoutService::transfer($r);

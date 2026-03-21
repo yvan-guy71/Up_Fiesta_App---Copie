@@ -72,9 +72,6 @@
                 <h2 class="text-xl font-semibold text-gray-800 mb-4">Prestataire</h2>
                 <div class="bg-gray-50 rounded-lg p-4">
                     <h3 class="text-lg font-semibold text-gray-800">{{ $booking->provider->name }}</h3>
-                    @if($booking->provider->phone)
-                        <p class="text-gray-600 mt-2">📞 {{ $booking->provider->phone }}</p>
-                    @endif
                     @if($booking->provider->email)
                         <p class="text-gray-600">✉️ {{ $booking->provider->email }}</p>
                     @endif

@@ -18,8 +18,12 @@ class ReviewController extends Controller
 
         $booking = Booking::where('id', $bookingId)
             ->where('user_id', Auth::id())
-            ->where('status', 'completed')
             ->firstOrFail();
+
+        // Allow review if booking is completed OR if provider has marked it done and review was requested
+        if (!($booking->status === 'completed' || ($booking->provider_done && $booking->require_client_review))) {
+            abort(403, 'Cette réservation n\'est pas prête pour une évaluation.');
+        }
 
         if ($booking->review()->exists()) {
             return back()->with('error', 'Vous avez déjà laissé un avis pour cette prestation.');

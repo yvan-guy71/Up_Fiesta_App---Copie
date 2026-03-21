@@ -225,7 +225,7 @@
 
     </style>
 </head>
-<body class="bg-slate-50 font-sans text-slate-900">
+<body class="bg-slate-50 dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-100">
     <x-flash-messages />
     <header class="bg-white/80 backdrop-blur border-b border-slate-100 sticky top-0 z-50">
         <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
@@ -462,18 +462,18 @@
                     </div>
                     
                     <div class="lg:w-48 relative flex items-center bg-white/10 px-4 py-2 rounded-xl border border-transparent focus-within:bg-white/20 focus-within:border-white/60 transition-all select-wrapper">
-                        <select id="select-kind" name="kind" class="search-select w-full bg-transparent border-none focus:ring-0 text-white font-medium pr-6">
-                            <option value="" class="text-slate-900">Tous types</option>
-                            <option value="{{ \App\Models\ServiceCategory::KIND_PRESTATIONS }}" {{ request('kind') === \App\Models\ServiceCategory::KIND_PRESTATIONS ? 'selected' : '' }} class="text-slate-900">{{ __('messages.categories.kind_prestations') }}</option>
-                            <option value="{{ \App\Models\ServiceCategory::KIND_DOMESTIQUES }}" {{ request('kind') === \App\Models\ServiceCategory::KIND_DOMESTIQUES ? 'selected' : '' }} class="text-slate-900">{{ __('messages.categories.kind_domestiques') }}</option>
+                        <select id="select-kind" name="kind" class="search-select w-full h-full px-6 py-4 bg-white dark:bg-slate-800 border border-slate-200/50 dark:border-slate-700/50 rounded-[1.5rem] text-slate-900 dark:text-white focus:ring-4 focus:ring-indigo-500/10 transition-all font-bold appearance-none shadow-sm">
+                            <option value="" class="text-slate-700 dark:text-slate-400">Tous types</option>
+                            <option value="{{ \App\Models\ServiceCategory::KIND_PRESTATIONS }}" {{ request('kind') === \App\Models\ServiceCategory::KIND_PRESTATIONS ? 'selected' : '' }} class="text-slate-700 dark:text-slate-400">{{ __('messages.categories.kind_prestations') }}</option>
+                            <option value="{{ \App\Models\ServiceCategory::KIND_DOMESTIQUES }}" {{ request('kind') === \App\Models\ServiceCategory::KIND_DOMESTIQUES ? 'selected' : '' }} class="text-slate-700 dark:text-slate-400">{{ __('messages.categories.kind_domestiques') }}</option>
                         </select>-
                     </div>
 
                     <div class="lg:w-48 relative flex items-center bg-white/10 px-4 py-2 rounded-xl border border-transparent focus-within:bg-white/20 focus-within:border-white/60 transition-all select-wrapper">
-                        <select id="select-category" name="category" class="search-select w-full bg-transparent border-none focus:ring-0 text-white font-medium pr-6">
-                            <option value="" class="text-slate-900">Toutes catégories</option>
+                        <select id="select-category" name="category" class="search-select  w-full h-full px-6 py-4 bg-white dark:bg-slate-800 border border-slate-200/50 dark:border-slate-700/50 rounded-[1.5rem] text-slate-900 dark:text-white focus:ring-4 focus:ring-indigo-500/10 transition-all font-bold appearance-none shadow-sm">
+                            <option value="" class="text-slate-700 dark:text-slate-400">Toutes catégories</option>
                             @foreach($searchCategories as $category)
-                                <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }} class="text-slate-900" data-kind="{{ $category->kind }}">
+                                <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }} class="text-slate-700 dark:text-slate-400" data-kind="{{ $category->kind }}">
                                     {{ $category->name }}
                                 </option>
                             @endforeach
@@ -481,10 +481,10 @@
                     </div>
 
                     <div class="lg:w-48 relative flex items-center bg-white/10 px-4 py-2 rounded-xl border border-transparent focus-within:bg-white/20 focus-within:border-white/60 transition-all select-wrapper">
-                        <select id="select-city" name="city" class="search-select w-full bg-transparent border-none focus:ring-0 text-white font-medium pr-6">
-                            <option value="" class="text-slate-900">Toutes les villes</option>
+                        <select id="select-city" name="city" class="search-select  w-full h-full px-6 py-4 bg-white dark:bg-slate-800 border border-slate-200/50 dark:border-slate-700/50 rounded-[1.5rem] text-slate-900 dark:text-white focus:ring-4 focus:ring-indigo-500/10 transition-all font-bold appearance-none shadow-sm">
+                            <option value="" class="text-slate-700 dark:text-slate-600 bg-slate-500">Toutes les villes</option>
                             @foreach($cities as $city)
-                                <option value="{{ $city->id }}" {{ request('city') == $city->id ? 'selected' : '' }} class="text-slate-900">
+                                <option value="{{ $city->id }}" {{ request('city') == $city->id ? 'selected' : '' }} class="text-slate-700 dark:text-slate-400">
                                     {{ $city->name }}
                                 </option>
                             @endforeach

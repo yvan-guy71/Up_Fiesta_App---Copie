@@ -58,7 +58,7 @@
             <a href="{{ route('home') }}" class="text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:underline">← Retour à l'accueil</a>
         </nav>
     </header>
-    <main class="max-w-7xl mx-auto py-12 px-4">
+    <main class="max-w-7xl mx-auto py-12 px-4 bg-slate-50 dark:bg-slate-950">
         <div class="grid lg:grid-cols-3 gap-8">
             <!-- Left Column: Info -->
             <div class="lg:col-span-2 space-y-8">
@@ -128,7 +128,7 @@
                                                 </div>
                                             </div>
                                         @else
-                                            <div class="w-full h-full flex items-center justify-center bg-slate-800 text-white">
+                                            <div class="w-full h-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -261,11 +261,11 @@
                 <div class="space-y-6">
                     <div>
                         <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Date souhaitée</label>
-                        <input type="date" name="event_date" required min="{{ date('Y-m-d', strtotime('+1 day')) }}" class="w-full bg-slate-50 dark:bg-slate-900 dark:text-white border-2 border-transparent focus:border-indigo-500 dark:focus:border-indigo-400 rounded-2xl px-5 py-4 outline-none transition-all font-bold">
+                        <input type="date" name="event_date" required min="{{ date('Y-m-d', strtotime('+1 day')) }}" class="w-full bg-white dark:bg-slate-800 dark:text-white border-2 border-transparent focus:border-indigo-500 dark:focus:border-indigo-400 rounded-2xl px-5 py-4 outline-none transition-all font-bold">
                     </div>
                     <div>
                         <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Détails de votre besoin</label>
-                        <textarea name="event_details" rows="4" placeholder="Lieu, description de la tâche, attentes particulières..." class="w-full bg-slate-50 dark:bg-slate-900 dark:text-white dark:placeholder-slate-600 border-2 border-transparent focus:border-indigo-500 dark:focus:border-indigo-400 rounded-2xl px-5 py-4 outline-none transition-all font-bold resize-none"></textarea>
+                        <textarea name="event_details" rows="4" placeholder="Lieu, description de la tâche, attentes particulières..." class="w-full bg-white dark:bg-slate-800 dark:text-white dark:placeholder-slate-500 border-2 border-transparent focus:border-indigo-500 dark:focus:border-indigo-400 rounded-2xl px-5 py-4 outline-none transition-all font-bold resize-none"></textarea>
                     </div>
                 </div>
                 <div class="mt-10 flex flex-col gap-3">

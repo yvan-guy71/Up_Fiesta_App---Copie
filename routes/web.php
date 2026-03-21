@@ -130,8 +130,9 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/messages/conversation/{user}', [MessageController::class, 'destroyConversation'])->name('messages.conversation.destroy');
 
     Route::get('/mes-reservations', [BookingController::class, 'index'])->name('bookings.index');
-    Route::get('/mes-reservations/{booking}', [BookingController::class, 'show'])->name('bookings.show');
+    Route::get('/mes-reservations/{id}', [BookingController::class, 'show'])->name('bookings.show')->where('id', '[0-9]+');
     Route::post('/reserver/{provider}', [BookingController::class, 'store'])->name('bookings.store');
+    Route::post('/reserver/assignation/{assignedService}', [BookingController::class, 'createFromAssignedService'])->name('bookings.createFromAssignedService');
     Route::post('/reservations/{booking}/avis', [ReviewController::class, 'store'])->name('reviews.store');
 
     Route::get('/paiement/{booking}/{method}', [PaymentController::class, 'checkout'])->name('payment.checkout');

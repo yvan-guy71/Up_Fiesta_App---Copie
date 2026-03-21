@@ -7,12 +7,14 @@ use App\Models\Provider;
 use App\Models\ServiceRequest;
 use App\Models\User;
 use App\Models\Message;
+use App\Models\Booking;
 use App\Notifications\ServiceAssignedNotification;
 use App\Notifications\AssignmentAcceptedAdminNotification;
 use App\Notifications\AssignmentRejectedAdminNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\DB;
 
 class AssignedServiceController extends Controller
 {
@@ -125,6 +127,9 @@ class AssignedServiceController extends Controller
         // Update service request status
         $assignedService->serviceRequest->update(['status' => 'assigned']);
 
+        // Create a Booking record for this accepted service
+        $booking = $this->createBookingFromAssignment($assignedService, $provider);
+
         // Notify admins
         $admins = User::where('role', 'admin')->get();
         if ($admins->isNotEmpty()) {
@@ -153,6 +158,47 @@ class AssignedServiceController extends Controller
         }
 
         return back()->with('success', 'Service assignment accepted! You can now start working on it.');
+    }
+
+    /**
+     * Create a booking from an accepted assignment
+     */
+    private function createBookingFromAssignment(AssignedService $assignedService, Provider $provider): Booking
+    {
+        $serviceRequest = $assignedService->serviceRequest;
+        
+        // Check if booking already exists for this assignment
+        $existingBooking = Booking::where('assigned_service_id', $assignedService->id)
+            ->where('service_request_id', $serviceRequest->id)
+            ->first();
+        
+        if ($existingBooking) {
+            return $existingBooking;
+        }
+
+        // Create new booking with data from service request
+        $totalPrice = $serviceRequest->budget ?? 0;
+        $commissionRate = config('services.commission_rate', 10); // 10% commission by default
+        $platformFee = ($totalPrice * $commissionRate) / 100;
+        $providerAmount = $totalPrice - $platformFee;
+
+        $booking = Booking::create([
+            'user_id' => $serviceRequest->user_id,
+            'provider_id' => $provider->id,
+            'service_request_id' => $serviceRequest->id,
+            'assigned_service_id' => $assignedService->id,
+            'event_date' => $serviceRequest->event_date,
+            'event_details' => $serviceRequest->description,
+            'total_price' => $totalPrice,
+            'commission_rate' => $commissionRate,
+            'platform_fee' => $platformFee,
+            'provider_amount' => $providerAmount,
+            'status' => 'confirmed',
+            'payment_status' => 'unpaid',
+            'payout_status' => 'pending',
+        ]);
+
+        return $booking;
     }
 
     /**

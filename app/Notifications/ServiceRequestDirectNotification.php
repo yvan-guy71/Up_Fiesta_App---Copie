@@ -27,7 +27,7 @@ class ServiceRequestDirectNotification extends Notification implements ShouldQue
      */
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
+        return ['database'];
     }
 
     /**
@@ -46,7 +46,6 @@ class ServiceRequestDirectNotification extends Notification implements ShouldQue
             ->line('Localisation: ' . $this->serviceRequest->location)
             ->line('**Client:**')
             ->line('Nom: ' . $this->serviceRequest->user->name)
-            ->line('Téléphone: ' . $this->serviceRequest->user->phone)
             ->line('Veuillez accepter ou refuser cette demande dans votre espace professionnel.');
     }
 

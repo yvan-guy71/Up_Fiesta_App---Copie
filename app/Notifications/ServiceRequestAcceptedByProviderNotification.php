@@ -27,7 +27,7 @@ class ServiceRequestAcceptedByProviderNotification extends Notification implemen
      */
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
+        return ['database'];
     }
 
     /**
@@ -42,7 +42,6 @@ class ServiceRequestAcceptedByProviderNotification extends Notification implemen
             ->line('Bonne nouvelle! Le prestataire a accepté votre demande de service.')
             ->line('**Détails:**')
             ->line('Prestataire: ' . $provider->name)
-            ->line('Téléphone: ' . $provider->phone)
             ->line('Email: ' . $provider->email)
             ->line('Service: ' . $this->serviceRequest->subject)
             ->line('Date prévue: ' . $this->serviceRequest->event_date->format('d/m/Y H:i'))
@@ -60,7 +59,6 @@ class ServiceRequestAcceptedByProviderNotification extends Notification implemen
         return [
             'service_request_id' => $this->serviceRequest->id,
             'provider_name' => $this->serviceRequest->provider->name,
-            'provider_phone' => $this->serviceRequest->provider->phone,
             'message' => 'Le prestataire ' . $this->serviceRequest->provider->name . ' a accepté votre demande pour "' . $this->serviceRequest->subject . '".',
             'action_url' => '/mes-demandes/' . $this->serviceRequest->id,
         ];

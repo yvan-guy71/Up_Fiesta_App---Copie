@@ -20,7 +20,6 @@
         html { scroll-behavior: smooth; }
         html.dark body { background-color: #020617; color: #e5e7eb; }
         html.dark header { background-color: #1a1f2e; border-color: #2d3748; }
-        html.dark main { background-color: #020617; }
         html.dark .bg-white { background-color: #1a1f2e; border-color: #2d3748; }
         html.dark .bg-slate-50 { background-color: #111827; }
         html.dark .text-slate-500, html.dark .text-slate-600, html.dark .text-slate-700, html.dark .text-slate-900 { color: #e5e7eb; }
@@ -38,7 +37,7 @@
     <!-- Header/Nav simplified -->
     @include('partials.header')
 
-    <main class="max-w-4xl mx-auto py-16 px-4 dark:bg-slate-900 dark:text-white">
+    <main class="max-w-4xl mx-auto py-16 px-4 bg-slate-50 dark:bg-slate-950 dark:text-white">
         <div class="text-center mb-12">
             <h1 class="text-4xl font-black text-slate-900 dark:text-white mb-4">{{ __('contact.title') }}</h1>
             <p class="text-slate-500 dark:text-slate-400 text-lg">{{ __('contact.subtitle') }}</p>

@@ -5,12 +5,15 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ProviderResource\Pages;
 use App\Filament\Resources\ProviderResource\RelationManagers;
 use App\Models\Provider;
+use App\Notifications\ProviderApprovedNotification;
+use App\Notifications\ProviderRejectedNotification;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
+use Illuminate\Support\Facades\Notification;
 
 class ProviderResource extends Resource
 {
@@ -81,10 +84,24 @@ class ProviderResource extends Resource
                             ->image()
                             ->disk('public')
                             ->directory('providers-logos'),
+                        Forms\Components\Select::make('verification_status')
+                            ->label('Statut de Vérification')
+                            ->options([
+                                'pending' => 'En attente',
+                                'approved' => 'Approuvé',
+                                'rejected' => 'Rejeté',
+                            ])
+                            ->required()
+                            ->helperText('Sélectionnez le statut après avoir vérifier tous les documents ci-dessous.'),
+                        Forms\Components\Textarea::make('rejection_reason')
+                            ->label('Raison du rejet')
+                            ->helperText('Expliquez pourquoi le prestataire a été rejeté (visible par le prestataire).')
+                            ->visible(fn ($get) => $get('verification_status') === 'rejected')
+                            ->nullable(),
                         Forms\Components\Toggle::make('is_verified')
-                            ->label('Vérifié')
-                            ->helperText('Cochez cette case uniquement après avoir vérifié tous les documents ci-dessous.')
-                            ->required(),
+                            ->label('Vérifié (Legacy)')
+                            ->helperText('Ce champ est conservé pour compatibilité rétroactive.')
+                            ->dehydrated(false),
                         Forms\Components\TextInput::make('base_price')
                             ->label('Prix de base')
                             ->numeric()
@@ -180,9 +197,20 @@ class ProviderResource extends Resource
                     ->getStateUsing(fn ($record) => $record->email ?: $record->user?->email)
                     ->searchable()
                     ->copyable(),
-                Tables\Columns\IconColumn::make('is_verified')
-                    ->label('Vérifié')
-                    ->boolean(),
+                Tables\Columns\BadgeColumn::make('verification_status')
+                    ->label('Statut')
+                    ->colors([
+                        'gray' => 'pending',
+                        'success' => 'approved',
+                        'danger' => 'rejected',
+                    ])
+                    ->formatStateUsing(fn (string $state): string => match($state) {
+                        'pending' => 'En attente',
+                        'approved' => 'Approuvé',
+                        'rejected' => 'Rejeté',
+                        default => $state,
+                    })
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('base_price')
                     ->label('Prix de base')
                     ->money('XOF')
@@ -194,10 +222,82 @@ class ProviderResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('verification_status')
+                    ->label('Statut de Vérification')
+                    ->options([
+                        'pending' => 'En attente',
+                        'approved' => 'Approuvé',
+                        'rejected' => 'Rejeté',
+                    ])
+                    ->default('pending'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Action::make('approve')
+                    ->label('Approuver')
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->visible(fn ($record) => $record->verification_status !== 'approved')
+                    ->action(function (Provider $record) {
+                        $userId = auth()->user()?->id;
+                        if (!$userId) {
+                            return;
+                        }
+                        
+                        // Ensure user is loaded
+                        if (!$record->relationLoaded('user')) {
+                            $record->load('user');
+                        }
+                        
+                        if (!$record->user) {
+                            return;
+                        }
+                        
+                        $record->update([
+                            'verification_status' => 'approved',
+                            'verified_at' => now(),
+                            'verified_by' => $userId,
+                            'is_verified' => true,
+                        ]);
+                        Notification::send($record->user, new ProviderApprovedNotification());
+                    }),
+                Action::make('reject')
+                    ->label('Rejeter')
+                    ->icon('heroicon-o-x-circle')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->visible(fn ($record) => $record->verification_status !== 'rejected')
+                    ->form([
+                        Forms\Components\Textarea::make('rejection_reason')
+                            ->label('Raison du rejet')
+                            ->helperText('Expliquez pourquoi le prestataire a été rejeté (sera visible par le prestataire).')
+                            ->required(),
+                    ])
+                    ->action(function (Provider $record, array $data) {
+                        $userId = auth()->user()?->id;
+                        if (!$userId) {
+                            return;
+                        }
+                        
+                        // Ensure user is loaded
+                        if (!$record->relationLoaded('user')) {
+                            $record->load('user');
+                        }
+                        
+                        if (!$record->user) {
+                            return;
+                        }
+                        
+                        $record->update([
+                            'verification_status' => 'rejected',
+                            'rejection_reason' => $data['rejection_reason'],
+                            'verified_at' => now(),
+                            'verified_by' => $userId,
+                            'is_verified' => false,
+                        ]);
+                        Notification::send($record->user, new ProviderRejectedNotification($record, $data['rejection_reason']));
+                    }),
                 Action::make('Contacter')
                     ->icon('heroicon-o-chat-bubble-left-right')
                     ->color('info')

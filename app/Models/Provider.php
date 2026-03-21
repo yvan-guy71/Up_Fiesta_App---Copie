@@ -20,6 +20,10 @@ class Provider extends Model
         'website',
         'logo',
         'is_verified',
+        'verification_status',
+        'rejection_reason',
+        'verified_at',
+        'verified_by',
         'base_price',
         'price_range_max',
         'cni_number',
@@ -37,11 +41,17 @@ class Provider extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function verifiedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'verified_by');
+    }
+
     protected $casts = [
         'is_verified' => 'boolean',
         'is_company' => 'boolean',
         'base_price' => 'decimal:2',
         'price_range_max' => 'decimal:2',
+        'verified_at' => 'datetime',
     ];
 
     public function categories(): BelongsToMany
@@ -79,6 +89,30 @@ class Provider extends Model
     public function media(): HasMany
     {
         return $this->hasMany(ProviderMedia::class)->orderBy('sort_order');
+    }
+
+    /**
+     * Check if provider is approved
+     */
+    public function isApproved(): bool
+    {
+        return $this->verification_status === 'approved';
+    }
+
+    /**
+     * Check if provider is rejected
+     */
+    public function isRejected(): bool
+    {
+        return $this->verification_status === 'rejected';
+    }
+
+    /**
+     * Check if provider is pending verification
+     */
+    public function isPending(): bool
+    {
+        return $this->verification_status === 'pending';
     }
 }
 

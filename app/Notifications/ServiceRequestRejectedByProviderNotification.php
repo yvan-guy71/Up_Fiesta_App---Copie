@@ -27,7 +27,7 @@ class ServiceRequestRejectedByProviderNotification extends Notification implemen
      */
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
+        return ['database'];
     }
 
     /**
