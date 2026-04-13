@@ -10,7 +10,6 @@ use Filament\Navigation\NavigationItem;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
-use Filament\Support\Colors\Color;
 use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -19,6 +18,11 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use App\Http\Middleware\RedirectIfWrongPanel;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Illuminate\Validation\ValidationException;
+use Filament\Http\Responses\Auth\Contracts\LoginResponse;
+use Illuminate\Support\Facades\Route;
+use Filament\Facades\Filament;
+use Filament\Models\Contracts\FilamentUser;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -27,16 +31,28 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('admin')
-            ->path('up-fiesta-kygj')
+            ->path('Upfiesta-kygj')
             ->login(\App\Filament\Pages\Auth\AdminLogin::class)
-            ->brandName('ADMINISTRATION')
+            ->brandName('Upfiesta ADMIN')
             ->databaseNotifications()
             ->homeUrl('/')
             ->emailVerification()
             ->profile()
             ->authGuard('web')
             ->colors([
-                'primary' => Color::Indigo,
+                'primary' => [
+                    50 => '#f0f7ff',
+                    100 => '#e0effe',
+                    200 => '#bae0fd',
+                    300 => '#7cc2fb',
+                    400 => '#389ff7',
+                    500 => '#004aad', // Logo Blue
+                    600 => '#0a79eb',
+                    700 => '#0961c0',
+                    800 => '#0d519b',
+                    900 => '#114481',
+                    950 => '#0b2b54',
+                ],
             ])
             ->font('Poppins')
             ->darkMode(true)
@@ -65,6 +81,60 @@ class AdminPanelProvider extends PanelProvider
                     ->group('Navigation')
                     ->sort(100),
             ])
+            ->routes(function () {
+                Route::post('/login', function () {
+                    // Récupérer les données du formulaire
+                    $data = request('data', []);
+                    
+                    // Valider les données
+                    $data = validator($data, [
+                        'email' => 'required|string',
+                        'password' => 'required|string',
+                        'remember' => 'nullable|boolean',
+                    ])->validate();
+                    
+                    $credentials = [
+                        'email' => $data['email'],
+                        'password' => $data['password'],
+                    ];
+                    
+                    // Tentative d'authentification
+                    if (! Filament::auth()->attempt($credentials, $data['remember'] ?? false)) {
+                        throw ValidationException::withMessages([
+                            'data.email' => 'Identifiants incorrects.',
+                        ]);
+                    }
+                    
+                    $user = Filament::auth()->user();
+                    
+                    // Vérifier le rôle et rediriger si nécessaire
+                    if ($user->role === 'provider') {
+                        Filament::auth()->logout();
+                        throw ValidationException::withMessages([
+                            'data.email' => 'Ce compte est un compte prestataire. Veuillez vous connecter via l\'espace professionnel.',
+                        ]);
+                    }
+                    
+                    if ($user->role === 'client') {
+                        Filament::auth()->logout();
+                        throw ValidationException::withMessages([
+                            'data.email' => 'Ce compte est un compte client. Veuillez vous connecter via l\'espace client.',
+                        ]);
+                    }
+                    
+                    // Vérifier l'accès au panel
+                    if (! ($user instanceof FilamentUser) || ! $user->canAccessPanel(Filament::getCurrentPanel())) {
+                        Filament::auth()->logout();
+                        throw ValidationException::withMessages([
+                            'data.email' => 'Identifiants incorrects ou accès non autorisé à l\'administration.',
+                        ]);
+                    }
+                    
+                    session()->regenerate();
+                    
+                    return app(LoginResponse::class);
+                });
+            })
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
@@ -82,3 +152,6 @@ class AdminPanelProvider extends PanelProvider
             ]);
     }
 }
+
+
+

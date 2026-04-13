@@ -10,12 +10,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 use Symfony\Contracts\EventDispatcher\Event;
 
+/**
+ * @property-read ?\App\Models\Provider $provider
+ */
 class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -28,6 +32,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         'phone',
         'password',
         'role',
+        'fcm_token',
     ];
 
     /**

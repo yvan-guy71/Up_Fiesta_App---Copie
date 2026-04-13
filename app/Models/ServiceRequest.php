@@ -10,9 +10,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ServiceRequest extends Model
 {
-    // we record the service kind to distinguish prestations from domestiques
+    // Only prestations (event services) are supported now
     public const KIND_PRESTATIONS = 'prestations';
-    public const KIND_DOMESTIQUES = 'domestiques';
 
     protected $fillable = [
         'user_id',
@@ -26,11 +25,13 @@ class ServiceRequest extends Model
         'event_date',
         'location',
         'budget',
+        'viewed_at',
     ];
 
     protected $casts = [
         'event_date' => 'datetime',
         'budget' => 'decimal:2',
+        'viewed_at' => 'datetime',
     ];
 
     protected static function booted()
@@ -43,7 +44,7 @@ class ServiceRequest extends Model
                     
                     // Also send SMS if possible
                     try {
-                        $message = "Up Fiesta: Vous avez une nouvelle demande de service assignée. Connectez-vous pour la consulter.";
+                        $message = "Upfiesta: Vous avez une nouvelle demande de service assignée. Connectez-vous pour la consulter.";
                         if ($provider->phone) {
                             \App\Services\SmsService::send($provider->phone, $message);
                         }
@@ -80,3 +81,6 @@ class ServiceRequest extends Model
         return $this->hasMany(Booking::class);
     }
 }
+
+
+

@@ -20,7 +20,7 @@ class RedirectIfWrongPanel
 
         // Rediriger les prestataires et clients qui tentent d'accéder au panel admin
         // Utilisons le préfixe configuré dans AdminPanelProvider
-        if (str_starts_with($path, 'up-fiesta-kygj')) {
+        if (str_starts_with($path, 'Upfiesta-kygj')) {
             if ($user->role === 'provider') {
                 return redirect('/prestataire');
             }
@@ -37,11 +37,14 @@ class RedirectIfWrongPanel
             }
 
             if ($user->role === 'admin') {
-                return redirect('/up-fiesta-kygj');
+                return redirect('/Upfiesta-kygj');
             }
         }
 
         return $next($request);
     }
 }
+
+
+
 

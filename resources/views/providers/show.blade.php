@@ -184,6 +184,22 @@
 
             <!-- Right Column: Actions -->
             <div class="space-y-6">
+                @unless($provider->is_verified)
+                <div class="bg-amber-50 dark:bg-amber-900/20 rounded-3xl p-8 border-2 border-amber-200 dark:border-amber-800/50 shadow-sm">
+                    <div class="flex gap-4">
+                        <div class="flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-amber-600 dark:text-amber-400 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-black text-amber-900 dark:text-amber-100 mb-2">Prestataire non vérifié</h3>
+                            <p class="text-sm text-amber-800 dark:text-amber-200 leading-relaxed">Ce prestataire n'a pas encore été vérifié par Up Fiesta. Nous vous recommandons de discuter les détails en profondeur avant de confirmer votre réservation.</p>
+                        </div>
+                    </div>
+                </div>
+                @endunless
+
                 <div class="bg-indigo-600 dark:bg-indigo-600 rounded-3xl p-8 text-white shadow-xl dark:shadow-none border border-indigo-500 dark:border-indigo-700 relative overflow-hidden group">
                     <div class="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-3xl group-hover:bg-white/20 transition-all duration-500"></div>
                     <div class="relative z-10">
@@ -194,23 +210,23 @@
                         @php
                             $contactUrl = route('login');
                             if (auth()->check()) {
-                                // Redirection vers la messagerie avec Up Fiesta (Admin ID 1)
-                                $contactUrl = route('messages.show', ['user' => 1, 'needs_provider' => $provider->id]);
+                                // Redirection directe vers la messagerie avec le prestataire
+                                $contactUrl = route('messages.show', ['user' => $provider->user_id]);
                             }
                         @endphp
                         <div class="space-y-4">
                             <a href="{{ $contactUrl }}" class="block w-full py-4 bg-white text-indigo-600 text-center font-black rounded-2xl hover:bg-indigo-50 transition-all shadow-lg active:scale-95">
-                                Exprimer mes besoins
+                                Contacter directement
                             </a>
                             <button onclick="openBookingModal({{ $provider->id }}, '{{ addslashes($provider->name) }}')" class="block w-full py-4 bg-indigo-500/50 text-white text-center font-black rounded-2xl hover:bg-indigo-500/70 transition-all border border-indigo-400/50 backdrop-blur-sm active:scale-95">
-                                Réserver maintenant
+                                Faire une demande
                             </button>
                         </div>
                         <div class="mt-8 flex items-center justify-center gap-2 text-indigo-100/60 text-[10px] font-bold uppercase tracking-widest">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            Paiement sécurisé T-Money / Flooz
+                            Paiement direct au prestataire
                         </div>
                     </div>
                 </div>
@@ -256,6 +272,21 @@
                     </svg>
                 </button>
             </div>
+            
+            @unless($provider->is_verified)
+            <div class="bg-amber-50 dark:bg-amber-900/20 rounded-2xl p-4 border border-amber-200 dark:border-amber-800/50 mb-6 flex gap-3">
+                <div class="flex-shrink-0 mt-0.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-600 dark:text-amber-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-xs font-black text-amber-900 dark:text-amber-100 uppercase tracking-widest">Non vérifié</p>
+                    <p class="text-sm text-amber-800 dark:text-amber-200 mt-1">Discutez des détails avant de confirmer.</p>
+                </div>
+            </div>
+            @endunless
+            
             <form id="bookingForm" method="POST" action="">
                 @csrf
                 <div class="space-y-6">

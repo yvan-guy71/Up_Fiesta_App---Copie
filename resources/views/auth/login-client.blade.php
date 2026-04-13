@@ -10,19 +10,19 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
     <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#4f46e5">
+    <meta name="theme-color" content="#004aad">
 
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-50 font-sans text-slate-900">
+<body class="bg-slate-50 dark:bg-slate-900 font-sans text-slate-900 dark:text-white">
     <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-md w-full space-y-8 bg-white p-10 rounded-3xl shadow-xl shadow-slate-200 border border-slate-100">
+        <div class="max-w-md w-full space-y-8 bg-white dark:bg-slate-800 p-10 rounded-3xl shadow-xl shadow-slate-200 dark:shadow-black/30 border border-slate-100 dark:border-slate-700">
             <div class="text-center">
                 <a href="/" class="inline-flex items-center gap-2 mb-6">
                     <img src="{{ asset('images/logo.png') }}" alt="Up Fiesta Logo" class="h-12 w-auto">
                 </a>
-                <h2 class="text-3xl font-black text-slate-900">{{ __('auth.login_title') }}</h2>
-                <p class="mt-2 text-slate-500">{{ __('auth.login_subtitle') }}</p>
+                <h2 class="text-3xl font-black text-slate-900 dark:text-white">{{ __('auth.login_title') }}</h2>
+                <p class="mt-2 text-slate-500 dark:text-slate-400">{{ __('auth.login_subtitle') }}</p>
             </div>
 
             @if ($errors->any())
@@ -56,9 +56,9 @@
             @endif
 
             @if (session('suggest_provider_login'))
-                <div class="p-4 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 text-sm font-bold">
+                <div class="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-200 text-sm font-bold">
                     <p class="mb-2">{{ __('auth.login_provider_hint') }}</p>
-                    <a href="/prestataire/login" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                    <a href="/prestataire/login" class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg transition-colors shadow-md shadow-blue-500/30">
                         {{ __('auth.login_go_provider') }}
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -71,48 +71,48 @@
                 @csrf
                 <div class="space-y-4">
                     <div>
-                        <label for="email" class="block text-sm font-bold text-slate-700 mb-1">Email ou Téléphone</label>
-                        <input id="email" name="email" type="text" required class="w-full px-4 py-3 rounded-xl border @error('email') border-red-500 @else border-slate-200 @enderror focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 outline-none transition-all" placeholder="votre@email.com ou +228 90 00 00 00" value="{{ old('email') }}">
-                        <button type="button" id="use-phone-button" class="mt-2 text-xs font-bold text-indigo-600 hover:text-indigo-700">Saisir un numéro avec indicatif</button>
+                        <label for="email" class="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-1">Email ou Téléphone</label>
+                        <input id="email" name="email" type="text" required class="w-full px-4 py-3 rounded-xl border @error('email') border-red-500 @else border-slate-200 dark:border-slate-600 @enderror bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:border-blue-600 dark:focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/30 outline-none transition-all" placeholder="votre@email.com ou +228 90 00 00 00" value="{{ old('email') }}">
+                        <button type="button" id="use-phone-button" class="mt-2 text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">Saisir un numéro avec indicatif</button>
                         <div id="phone-login-wrapper" class="mt-2 hidden">
-                            <input id="phone_login" type="tel" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 outline-none transition-all" placeholder="+228 90 00 00 00">
+                            <input id="phone_login" type="tel" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:border-blue-600 dark:focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/30 outline-none transition-all" placeholder="+228 90 00 00 00">
                             <input type="hidden" id="phone_full_login">
                             <p class="text-[10px] text-slate-500 mt-1">Le champ “Email ou Téléphone” sera automatiquement rempli avec votre numéro au bon format.</p>
                         </div>
                     </div>
                     <div>
-                        <label for="password" class="block text-sm font-bold text-slate-700 mb-1">{{ __('auth.login_password') }}</label>
-                        <input id="password" name="password" type="password" required class="w-full px-4 py-3 rounded-xl border @error('email') border-red-500 @else border-slate-200 @enderror focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 outline-none transition-all" placeholder="••••••••">
+                        <label for="password" class="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-1">{{ __('auth.login_password') }}</label>
+                        <input id="password" name="password" type="password" required class="w-full px-4 py-3 rounded-xl border @error('email') border-red-500 @else border-slate-200 dark:border-slate-600 @enderror bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:border-blue-600 dark:focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/30 outline-none transition-all" placeholder="••••••••">
                     </div>
                 </div>
 
                 <div class="flex items-center justify-between">
                     <div class="flex items-center">
-                        <input id="remember_me" name="remember" type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-slate-300 rounded">
-                        <label for="remember_me" class="ml-2 block text-sm text-slate-600">{{ __('auth.login_remember') }}</label>
+                        <input id="remember_me" name="remember" type="checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded">
+                        <label for="remember_me" class="ml-2 block text-sm text-slate-600 dark:text-slate-300">{{ __('auth.login_remember') }}</label>
                     </div>
                     <div class="text-sm">
-                        <a href="{{ route('password.request') }}" class="font-bold text-indigo-600 hover:text-indigo-500">{{ __('auth.login_forgot') }}</a>
+                        <a href="{{ route('password.request') }}" class="font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">{{ __('auth.login_forgot') }}</a>
                     </div>
                 </div>
 
                 <div>
-                    <button type="submit" class="w-full flex justify-center py-4 px-4 border border-transparent text-sm font-black rounded-2xl text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-lg shadow-indigo-100 transition-all">
+                    <button type="submit" class="w-full flex justify-center py-4 px-4 border border-transparent text-sm font-black rounded-2xl text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-slate-800 shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20 transition-all">
                         {{ __('auth.login_button') }}
                     </button>
                 </div>
 
                 <div class="relative py-4">
                     <div class="absolute inset-0 flex items-center">
-                        <div class="w-full border-t border-slate-100"></div>
+                        <div class="w-full border-t border-slate-200 dark:border-slate-700"></div>
                     </div>
                     <div class="relative flex justify-center text-sm">
-                        <span class="px-2 bg-white text-slate-400">OU</span>
+                        <span class="px-2 bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-500">OU</span>
                     </div>
                 </div>
 
                 <div>
-                    <a href="{{ route('login.google') }}" class="w-full flex justify-center items-center gap-3 py-4 px-4 border-2 border-slate-100 text-sm font-black rounded-2xl text-slate-700 hover:bg-slate-50 hover:border-slate-200 focus:outline-none transition-all">
+                    <a href="{{ route('login.google') }}" class="w-full flex justify-center items-center gap-3 py-4 px-4 border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700 text-sm font-black rounded-2xl text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 hover:border-slate-300 dark:hover:border-slate-600 focus:outline-none transition-all shadow-sm">
                         <svg class="w-5 h-5" viewBox="0 0 24 24">
                             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                             <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -124,14 +124,14 @@
                 </div>
             </form>
 
-            <div class="text-center pt-6 border-t border-slate-100">
-                <p class="text-sm text-slate-500">
+            <div class="text-center pt-6 border-t border-slate-200 dark:border-slate-700">
+                <p class="text-sm text-slate-600 dark:text-slate-400">
                     {{ __('auth.login_no_account') }}
-                    <a href="{{ route('register.client') }}" class="font-bold text-indigo-600 hover:text-indigo-500">{{ __('auth.login_create_account') }}</a>
+                    <a href="{{ route('register.client') }}" class="font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">{{ __('auth.login_create_account') }}</a>
                 </p>
                 <div class="mt-4 flex flex-col gap-2">
-                    <a href="{{ route('register.provider') }}" class="text-xs font-bold text-slate-400 hover:text-slate-600">{{ __('auth.login_provider_cta') }}</a>
-                    <a href="{{ route('home') }}" class="text-xs font-bold text-indigo-500 hover:text-indigo-700">{{ __('auth.back_home') }}</a>
+                    <a href="{{ route('register.provider') }}" class="text-xs font-bold text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300">{{ __('auth.login_provider_cta') }}</a>
+                    <a href="{{ route('home') }}" class="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">{{ __('auth.back_home') }}</a>
                 </div>
             </div>
         </div>

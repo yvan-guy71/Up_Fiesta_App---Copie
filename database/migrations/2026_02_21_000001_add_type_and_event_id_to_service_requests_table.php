@@ -13,13 +13,12 @@ return new class extends Migration
     {
         Schema::table('service_requests', function (Blueprint $table) {
             if (! Schema::hasColumn('service_requests', 'type')) {
-                $table->string('type')->default('service')->after('user_id');
+                $table->string('type')->default('service');
             }
 
             if (! Schema::hasColumn('service_requests', 'event_id')) {
                 $table->foreignId('event_id')
                     ->nullable()
-                    ->after('provider_id')
                     ->constrained('events')
                     ->nullOnDelete();
             }
@@ -42,4 +41,3 @@ return new class extends Migration
         });
     }
 };
-

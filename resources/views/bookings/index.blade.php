@@ -47,6 +47,22 @@
         </nav>
     </header>
 
+    <style>
+        #desktop-view {
+            display: block;
+        }
+        #mobile-view {
+            display: none;
+        }
+        @media (max-width: 768px) {
+            #desktop-view {
+                display: none;
+            }
+            #mobile-view {
+                display: block;
+            }
+        }
+    </style>
     <main class="max-w-7xl mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
         <!-- Header Section -->
         <div class="mb-8">
@@ -55,7 +71,7 @@
         </div>
 
         <!-- Desktop Table View -->
-        <div class="hidden md:block bg-white dark:bg-slate-800 rounded-2xl shadow-sm dark:shadow-xl dark:shadow-slate-900/50 border border-slate-100 dark:border-slate-700 overflow-hidden">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm dark:shadow-xl dark:shadow-slate-900/50 border border-slate-100 dark:border-slate-700 overflow-hidden" id="desktop-view">
             <table class="w-full text-left">
                 <thead class="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700">
                     <tr>
@@ -72,63 +88,62 @@
                             $isBooking = $item instanceof \App\Models\Booking;
                             $isAssignedService = $item instanceof \App\Models\AssignedService;
                             
-                            $provider = $isBooking ? $item->provider : $item->provider;
-                            $eventDate = $isBooking ? $item->event_date : $item->serviceRequest->event_date;
-                            $price = $isBooking ? $item->total_price : ($item->serviceRequest->budget ?? $item->provider->base_price ?? 0);
+                            $provider = $isBooking ? $item->provider : ($item->provider ?? null);
+                            $eventDate = $isBooking ? $item->event_date : ($item->serviceRequest?->event_date ?? null);
+                            $price = $isBooking ? $item->total_price : ($item->serviceRequest?->budget ?? $item->provider?->base_price ?? 0);
                             $status = $isBooking ? $item->status : $item->status;
                             $paymentStatus = $isBooking ? $item->payment_status : null;
                             $itemId = $item->id;
                         @endphp
                         <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
                             <td class="px-6 py-5">
-                                <div class="font-bold text-slate-900 dark:text-white">{{ $provider->name }}</div>
-                                <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">{{ $provider->category->name ?? 'Services' }}</div>
+                                <div class="font-bold text-slate-900 dark:text-white">{{ $provider->name ?? 'Prestataire inconnu' }}</div>
+                                <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">{{ $provider?->category?->name ?? 'Services' }}</div>
                             </td>
                             <td class="px-6 py-5 text-slate-600 dark:text-slate-400">
-                                {{ $eventDate->format('d/m/Y') }}
+                                {{ $eventDate?->format('d/m/Y') ?? 'Date non définie' }}
                             </td>
                             <td class="px-6 py-5 font-bold text-slate-900 dark:text-white">
-                                {{ number_format($price, 0, ',', ' ') }} XOF
+                                {{ $price > 0 ? number_format($price, 0, ',', ' ') . ' XOF' : 'À définir' }}
                             </td>
                             <td class="px-6 py-5">
                                 <div class="flex flex-col gap-2">
                                     <span class="px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest w-fit
-                                        @if($status == 'pending') bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400
+                                        @if($status == 'pending_provider_response') bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400
+                                        @elseif($status == 'pending') bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400
                                         @elseif($status == 'confirmed' || $status == 'accepted') bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400
                                         @elseif($status == 'cancelled' || $status == 'rejected') bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400
                                         @elseif($status == 'completed') bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400
                                         @else bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 @endif">
                                         @if($isAssignedService && $status == 'accepted')
-                                            Acceptée - À réserver
+                                            ✓ Acceptée - À réserver
+                                        @elseif($status == 'pending_provider_response')
+                                            ⏳ En attente de réponse
+                                        @elseif($status == 'confirmed')
+                                            ✓ Confirmée
+                                        @elseif($status == 'rejected')
+                                            ✗ Refusée
+                                        @elseif($status == 'completed')
+                                            ✓ Terminée
+                                        @elseif($status == 'cancelled')
+                                            ✗ Annulée
                                         @else
-                                            {{ ucfirst($status) }}
+                                            {{ ucfirst(str_replace('_', ' ', $status)) }}
                                         @endif
                                     </span>
                                     @if($isBooking && $paymentStatus == 'paid')
-                                        <span class="px-3 py-1 rounded-full text-[10px] font-black bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 uppercase tracking-widest w-fit">PAYÉ</span>
+                                        <span class="px-3 py-1 rounded-full text-[10px] font-black bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 uppercase tracking-widest w-fit">💳 PAYÉ</span>
                                     @elseif($isBooking && $paymentStatus == 'pending')
-                                        <span class="px-3 py-1 rounded-full text-[10px] font-black bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 uppercase tracking-widest w-fit">EN ATTENTE</span>
+                                        <span class="px-3 py-1 rounded-full text-[10px] font-black bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 uppercase tracking-widest w-fit">⏳ EN ATTENTE</span>
                                     @endif
                                 </div>
                             </td>
                             <td class="px-6 py-5">
                                 <div class="flex flex-wrap gap-2">
-                                    @if($isBooking)
-                                        @if($item->payment_status == 'unpaid' && $item->status != 'cancelled')
-                                            <a href="{{ route('payment.checkout', ['booking' => $item->id, 'method' => 'tmoney']) }}" class="text-xs bg-yellow-400 dark:bg-yellow-600 text-yellow-900 dark:text-yellow-100 px-3 py-1.5 rounded-lg font-bold hover:shadow-md transition-all">T-Money</a>
-                                            <a href="{{ route('payment.checkout', ['booking' => $item->id, 'method' => 'flooz']) }}" class="text-xs bg-blue-600 dark:bg-blue-700 text-white px-3 py-1.5 rounded-lg font-bold hover:shadow-md transition-all">Flooz</a>
-                                            <a href="{{ route('payment.checkout', ['booking' => $item->id, 'method' => 'card']) }}" class="text-xs bg-indigo-600 dark:bg-indigo-700 text-white px-3 py-1.5 rounded-lg font-bold hover:shadow-md transition-all">Carte</a>
-                                        @endif
-                                        @if($item->payment_status == 'pending')
-                                            <span class="text-xs text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 px-3 py-1.5 rounded-lg font-bold">Validation en cours</span>
-                                        @endif
-                                        <a href="{{ route('service-requests.create', ['provider_id' => $item->provider->id]) }}" class="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-bold px-3 py-1.5 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-all">Nouveau besoin</a>
+                                    @if($isBooking && $provider)
+                                        <a href="{{ route('service-requests.create', ['provider_id' => $provider->id]) }}" class="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-bold px-3 py-1.5 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-all">Nouveau besoin</a>
                                     @elseif($isAssignedService)
                                         <a href="{{ route('bookings.show', $item->id) }}" class="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-bold px-3 py-1.5 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-all">Voir détails</a>
-                                        <form action="{{ route('bookings.createFromAssignedService', $item->id) }}" method="POST" style="display:inline;">
-                                            @csrf
-                                            <button type="submit" class="text-xs bg-green-600 dark:bg-green-700 text-white px-3 py-1.5 rounded-lg font-bold hover:shadow-md transition-all">Réserver</button>
-                                        </form>
                                     @endif
                                 </div>
                             </td>
@@ -150,15 +165,15 @@
         </div>
 
         <!-- Mobile Card View -->
-        <div class="md:hidden space-y-4">
+        <div id="mobile-view" class="space-y-4">
             @forelse($allReservations as $item)
                 @php
                     $isBooking = $item instanceof \App\Models\Booking;
                     $isAssignedService = $item instanceof \App\Models\AssignedService;
                     
-                    $provider = $isBooking ? $item->provider : $item->provider;
-                    $eventDate = $isBooking ? $item->event_date : $item->serviceRequest->event_date;
-                    $price = $isBooking ? $item->total_price : ($item->serviceRequest->budget ?? $item->provider->base_price ?? 0);
+                    $provider = $isBooking ? $item->provider : ($item->provider ?? null);
+                    $eventDate = $isBooking ? $item->event_date : ($item->serviceRequest?->event_date ?? null);
+                    $price = $isBooking ? $item->total_price : ($item->serviceRequest?->budget ?? $item->provider?->base_price ?? 0);
                     $status = $isBooking ? $item->status : $item->status;
                     $paymentStatus = $isBooking ? $item->payment_status : null;
                     $review = $isBooking ? $item->review : null;
@@ -166,88 +181,60 @@
                 <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm dark:shadow-xl dark:shadow-slate-900/50 border border-slate-100 dark:border-slate-700 overflow-hidden p-5 space-y-4">
                     <!-- Provider Info -->
                     <div>
-                        <h3 class="font-black text-slate-900 dark:text-white text-lg">{{ $provider->name }}</h3>
-                        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">{{ $provider->category->name ?? 'Services' }}</p>
+                        <h3 class="font-black text-slate-900 dark:text-white text-lg">{{ $provider->name ?? 'Prestataire inconnu' }}</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">{{ $provider?->category?->name ?? 'Services' }}</p>
                     </div>
 
                     <!-- Date and Price -->
                     <div class="grid grid-cols-2 gap-4 pt-3 border-t border-slate-100 dark:border-slate-700">
                         <div>
                             <p class="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mb-1">Date prévue</p>
-                            <p class="text-lg font-bold text-slate-900 dark:text-white">{{ $eventDate->format('d/m/Y') }}</p>
+                            <p class="text-lg font-bold text-slate-900 dark:text-white">{{ $eventDate?->format('d/m/Y') ?? 'Non définie' }}</p>
                         </div>
                         <div class="text-right">
                             <p class="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mb-1">Prix total</p>
-                            <p class="text-lg font-black text-indigo-600 dark:text-indigo-400">{{ number_format($price, 0, ',', ' ') }} XOF</p>
+                            <p class="text-lg font-black text-indigo-600 dark:text-indigo-400">{{ $price > 0 ? number_format($price, 0, ',', ' ') . ' XOF' : 'À définir' }}</p>
                         </div>
                     </div>
 
                     <!-- Status -->
                     <div class="flex flex-wrap gap-2 pt-3 border-t border-slate-100 dark:border-slate-700">
                         <span class="px-3 py-1.5 rounded-full text-xs font-black uppercase tracking-widest
-                            @if($status == 'pending') bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400
+                            @if($status == 'pending_provider_response') bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400
+                            @elseif($status == 'pending') bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400
                             @elseif($status == 'confirmed' || $status == 'accepted') bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400
                             @elseif($status == 'cancelled' || $status == 'rejected') bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400
                             @elseif($status == 'completed') bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400
                             @else bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 @endif">
                             @if($isAssignedService && $status == 'accepted')
-                                Acceptée - À réserver
+                                ✓ Acceptée - À réserver
+                            @elseif($status == 'pending_provider_response')
+                                ⏳ En attente de réponse
+                            @elseif($status == 'confirmed')
+                                ✓ Confirmée
+                            @elseif($status == 'rejected')
+                                ✗ Refusée
+                            @elseif($status == 'completed')
+                                ✓ Terminée
+                            @elseif($status == 'cancelled')
+                                ✗ Annulée
                             @else
-                                {{ ucfirst($status) }}
+                                {{ ucfirst(str_replace('_', ' ', $status)) }}
                             @endif
                         </span>
                         @if($isBooking && $paymentStatus == 'paid')
-                            <span class="px-3 py-1.5 rounded-full text-xs font-black bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 uppercase tracking-widest">PAYÉ</span>
+                            <span class="px-3 py-1.5 rounded-full text-xs font-black bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 uppercase tracking-widest">💳 PAYÉ</span>
                         @elseif($isBooking && $paymentStatus == 'pending')
-                            <span class="px-3 py-1.5 rounded-full text-xs font-black bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 uppercase tracking-widest">EN ATTENTE</span>
+                            <span class="px-3 py-1.5 rounded-full text-xs font-black bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 uppercase tracking-widest">⏳ EN ATTENTE</span>
                         @endif
                     </div>
 
                     <!-- Actions -->
-                    <div class="space-y-3 pt-3 border-t border-slate-100 dark:border-slate-700">
-                        @if($isBooking)
-                            @if($item->payment_status == 'unpaid' && $item->status != 'cancelled')
-                                <div class="space-y-2">
-                                    <p class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Payer maintenant</p>
-                                    <div class="grid grid-cols-3 gap-2">
-                                        <a href="{{ route('payment.checkout', ['booking' => $item->id, 'method' => 'tmoney']) }}" class="text-xs bg-yellow-400 dark:bg-yellow-600 text-yellow-900 dark:text-yellow-100 px-3 py-2 rounded-lg font-bold hover:shadow-md transition-all text-center">T-Money</a>
-                                        <a href="{{ route('payment.checkout', ['booking' => $item->id, 'method' => 'flooz']) }}" class="text-xs bg-blue-600 dark:bg-blue-700 text-white px-3 py-2 rounded-lg font-bold hover:shadow-md transition-all text-center">Flooz</a>
-                                        <a href="{{ route('payment.checkout', ['booking' => $item->id, 'method' => 'card']) }}" class="text-xs bg-indigo-600 dark:bg-indigo-700 text-white px-3 py-2 rounded-lg font-bold hover:shadow-md transition-all text-center">Carte</a>
-                                    </div>
-                                    <p class="text-[10px] text-slate-500 dark:text-slate-400 italic">Après redirection, suivez les instructions PayGate.</p>
-                                </div>
-                            @endif
-                            @if($item->payment_status == 'pending')
-                                <p class="text-xs text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 px-3 py-2 rounded-lg font-bold">Votre paiement est en cours de validation (jusqu'à 15 min).</p>
-                            @endif
-
-                            <a href="{{ route('service-requests.create', ['provider_id' => $item->provider->id]) }}" class="block w-full text-center text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-bold px-4 py-2 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-all">Exprimer un nouveau besoin</a>
-
-                            @if($item->status === 'completed')
-                                @if($review)
-                                    <p class="text-xs text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 px-3 py-2 rounded-lg font-bold text-center">Avis déjà envoyé. Merci !</p>
-                                @else
-                                    <form action="{{ route('reviews.store', $item->id) }}" method="POST" class="space-y-2">
-                                        @csrf
-                                        <label for="rating-{{ $item->id }}" class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest block">Laisser un avis</label>
-                                        <div class="grid grid-cols-2 gap-2">
-                                            <select id="rating-{{ $item->id }}" name="rating" class="text-xs border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                                @for($i = 5; $i >= 1; $i--)
-                                                    <option value="{{ $i }}">{{ $i }} ★</option>
-                                                @endfor
-                                            </select>
-                                            <button type="submit" class="text-xs bg-indigo-600 dark:bg-indigo-700 text-white px-3 py-2 rounded-lg font-bold hover:shadow-md transition-all">Envoyer</button>
-                                        </div>
-                                        <input type="text" name="comment" placeholder="Votre avis (optionnel)" class="w-full text-xs border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-slate-400 dark:placeholder-slate-500" />
-                                    </form>
-                                @endif
-                            @endif
+                    <div class="flex flex-wrap gap-2 pt-4 border-t border-slate-100 dark:border-slate-700">
+                        @if($isBooking && $provider)
+                            <a href="{{ route('service-requests.create', ['provider_id' => $provider->id]) }}" class="flex-1 text-center text-xs text-indigo-600 dark:text-indigo-400 font-bold px-4 py-2 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-900/30 transition-all">Nouveau besoin</a>
                         @elseif($isAssignedService)
-                            <a href="{{ route('bookings.show', $item->id) }}" class="block w-full text-center text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-bold px-4 py-2 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-all">Voir détails</a>
-                            <form action="{{ route('bookings.createFromAssignedService', $item->id) }}" method="POST">
-                                @csrf
-                                <button type="submit" class="block w-full text-center text-white bg-green-600 dark:bg-green-700 hover:bg-green-700 dark:hover:bg-green-800 font-bold px-4 py-2 rounded-lg transition-all">Réserver maintenant</button>
-                            </form>
+                            <a href="{{ route('bookings.show', $item->id) }}" class="flex-1 text-center text-xs text-indigo-600 dark:text-indigo-400 font-bold px-4 py-2 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-900/30 transition-all">Détails</a>
                         @endif
                     </div>
                 </div>

@@ -4,26 +4,30 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ProviderResource\Pages;
 use App\Filament\Resources\ProviderResource\RelationManagers;
+use Filament\Resources\Resource;
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Tables;
+use Filament\Tables\Table;
+
+
 use App\Models\Provider;
 use App\Notifications\ProviderApprovedNotification;
 use App\Notifications\ProviderRejectedNotification;
-use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Filament\Tables\Actions\Action;
-use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Builder;
 
 class ProviderResource extends Resource
 {
     protected static ?string $model = Provider::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-user-group';
-
+    protected static ?string $navigationIcon = 'heroicon-o-briefcase';
+    
     protected static ?string $navigationLabel = 'Prestataires';
-
+    
     protected static ?string $modelLabel = 'Prestataire';
+    
+    protected static ?string $pluralModelLabel = 'Prestataires';
 
     public static function form(Form $form): Form
     {
@@ -32,138 +36,117 @@ class ProviderResource extends Resource
                 Forms\Components\Section::make('Informations Générales')
                     ->schema([
                         Forms\Components\Select::make('user_id')
-                            ->label('Utilisateur lié')
-                            ->relationship('user', 'name', fn ($query) => $query->where('role', 'provider'))
-                            ->searchable()
-                            ->preload()
-                            ->required(),
-                        Forms\Components\TextInput::make('name')
-                            ->label('Nom du prestataire')
+                            ->relationship('user', 'name')
                             ->required()
-                            ->maxLength(255),
-                        Forms\Components\Select::make('categories')
-                            ->label('Catégories')
-                            ->relationship('categories', 'name')
-                            ->multiple()
-                            ->searchable()
-                            ->preload()
-                            ->required(),
+                            ->label('Utilisateur associé'),
+                        Forms\Components\TextInput::make('name')
+                            ->required()
+                            ->maxLength(255)
+                            ->label('Nom commercial'),
+                        Forms\Components\TextInput::make('email')
+                            ->email()
+                            ->maxLength(255)
+                            ->label('Email de contact'),
+                        Forms\Components\TextInput::make('phone')
+                            ->tel()
+                            ->maxLength(255)
+                            ->label('Téléphone'),
                         Forms\Components\Select::make('category_id')
-                            ->label('Catégorie Principale')
                             ->relationship('category', 'name')
                             ->required()
-                            ->searchable()
-                            ->preload(),
-                        Forms\Components\Textarea::make('description')
-                            ->label('Description')
-                            ->required()
-                            ->columnSpanFull(),
-                    ])->columns(2),
-
-                Forms\Components\Section::make('Contact & Localisation')
-                    ->schema([
-                        Forms\Components\TextInput::make('phone')
-                            ->label('Téléphone')
-                            ->tel()
-                            ->required(),
-                        Forms\Components\TextInput::make('email')
-                            ->label('Email')
-                            ->email()
-                            ->default(fn ($record) => $record?->email ?: $record?->user?->email),
+                            ->label('Catégorie principale'),
                         Forms\Components\Select::make('city_id')
-                            ->label('Ville')
                             ->relationship('city', 'name')
-                            ->searchable()
-                            ->preload(),
-                    ])->columns(2),
-
-                Forms\Components\Section::make('Détails & Vérification')
-                    ->schema([
+                            ->required()
+                            ->label('Ville'),
+                        Forms\Components\Textarea::make('description')
+                            ->columnSpanFull()
+                            ->label('Description'),
                         Forms\Components\FileUpload::make('logo')
-                            ->label('Logo')
                             ->image()
                             ->disk('public')
-                            ->directory('providers-logos'),
+                            ->directory('providers/logos')
+                            ->label('Logo / Photo de profil'),
+                    ])->columns(2),
+
+                Forms\Components\Section::make('Vérification & Statut')
+                    ->schema([
                         Forms\Components\Select::make('verification_status')
-                            ->label('Statut de Vérification')
                             ->options([
                                 'pending' => 'En attente',
                                 'approved' => 'Approuvé',
                                 'rejected' => 'Rejeté',
                             ])
                             ->required()
-                            ->helperText('Sélectionnez le statut après avoir vérifier tous les documents ci-dessous.'),
+                            ->label('Statut de vérification')
+                            ->reactive(),
                         Forms\Components\Textarea::make('rejection_reason')
                             ->label('Raison du rejet')
-                            ->helperText('Expliquez pourquoi le prestataire a été rejeté (visible par le prestataire).')
                             ->visible(fn ($get) => $get('verification_status') === 'rejected')
-                            ->nullable(),
+                            ->columnSpanFull(),
                         Forms\Components\Toggle::make('is_verified')
-                            ->label('Vérifié (Legacy)')
-                            ->helperText('Ce champ est conservé pour compatibilité rétroactive.')
-                            ->dehydrated(false),
-                        Forms\Components\TextInput::make('base_price')
-                            ->label('Prix de base')
-                            ->numeric()
-                            ->suffix('XOF'),
-                        Forms\Components\TextInput::make('price_range_max')
-                            ->label('Prix max')
-                            ->numeric()
-                            ->suffix('XOF'),
+                            ->label('Est certifié (Badge vérifié)')
+                            ->helperText('Cochez pour afficher le badge de certification sur le profil'),
                     ])->columns(2),
 
-                Forms\Components\Section::make('Documents de Vérification')
-                    ->description('Ces documents sont nécessaires pour valider le compte du prestataire.')
+                Forms\Components\Section::make('Documents & Expérience')
                     ->schema([
-                        Forms\Components\TextInput::make('cni_number')
-                            ->label('Numéro CNI')
-                            ->disabled()
-                            ->dehydrated(false),
-                        Forms\Components\TextInput::make('years_of_experience')
-                            ->label('Années d\'expérience')
-                            ->numeric()
-                            ->disabled()
-                            ->dehydrated(false),
-                        Forms\Components\FileUpload::make('cni_photo_front')
-                            ->label('CNI (Recto)')
-                            ->image()
-                            ->disk('public')
-                            ->directory('verification/cni')
-                            ->visibility('public')
-                            ->required()
-                            ->openable()
-                            ->downloadable(),
-                        Forms\Components\FileUpload::make('cni_photo_back')
-                            ->label('CNI (Verso)')
-                            ->image()
-                            ->disk('public')
-                            ->directory('verification/cni')
-                            ->visibility('public')
-                            ->required()
-                            ->openable()
-                            ->downloadable(),
                         Forms\Components\Toggle::make('is_company')
-                            ->label('Entreprise enregistrée')
-                            ->disabled()
-                            ->dehydrated(false),
+                            ->label('Est une entreprise')
+                            ->reactive(),
                         Forms\Components\TextInput::make('company_registration_number')
-                            ->label('Numéro RCCM / NIF')
-                            ->disabled()
-                            ->dehydrated(false),
+                            ->label('Numéro RCCM')
+                            ->visible(fn ($get) => $get('is_company')),
+                        Forms\Components\TextInput::make('cni_number')
+                            ->label('Numéro CNI/Passeport')
+                            ->hidden(fn ($get) => $get('is_company')),
+                        Forms\Components\TextInput::make('years_of_experience')
+                            ->numeric()
+                            ->label('Années d\'expérience'),
+                        Forms\Components\FileUpload::make('cni_photo_front')
+                            ->image()
+                            ->disk('public')
+                            ->directory('verification/cni')
+                            ->label('CNI (Recto)')
+                            ->openable()
+                            ->downloadable()
+                            ->hidden(fn ($get) => $get('is_company')),
+                        Forms\Components\FileUpload::make('cni_photo_back')
+                            ->image()
+                            ->disk('public')
+                            ->directory('verification/cni')
+                            ->label('CNI (Verso)')
+                            ->openable()
+                            ->downloadable()
+                            ->hidden(fn ($get) => $get('is_company')),
                         Forms\Components\FileUpload::make('company_proof_doc_front')
-                            ->label('Preuve d\'enregistrement (Recto / Page 1)')
+                            ->image()
                             ->disk('public')
                             ->directory('verification/company')
-                            ->visibility('public')
+                            ->label('Document entreprise (Recto)')
                             ->openable()
-                            ->downloadable(),
+                            ->downloadable()
+                            ->visible(fn ($get) => $get('is_company')),
                         Forms\Components\FileUpload::make('company_proof_doc_back')
-                            ->label('Preuve d\'enregistrement (Verso / Page 2)')
+                            ->image()
                             ->disk('public')
                             ->directory('verification/company')
-                            ->visibility('public')
+                            ->label('Document entreprise (Verso)')
                             ->openable()
-                            ->downloadable(),
+                            ->downloadable()
+                            ->visible(fn ($get) => $get('is_company')),
+                    ])->columns(2),
+
+                Forms\Components\Section::make('Tarification')
+                    ->schema([
+                        Forms\Components\TextInput::make('base_price')
+                            ->numeric()
+                            ->prefix('XOF')
+                            ->label('Prix minimum'),
+                        Forms\Components\TextInput::make('price_range_max')
+                            ->numeric()
+                            ->prefix('XOF')
+                            ->label('Prix maximum'),
                     ])->columns(2),
             ]);
     }
@@ -173,6 +156,7 @@ class ProviderResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\ImageColumn::make('logo')
+                    ->disk('public')
                     ->circular(),
                 Tables\Columns\TextColumn::make('user.name')
                     ->label('Utilisateur')
@@ -182,10 +166,9 @@ class ProviderResource extends Resource
                     ->label('Nom')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('categories.name')
-                    ->label('Catégories')
-                    ->badge()
-                    ->searchable(),
+                Tables\Columns\TextColumn::make('category.name')
+                    ->label('Catégorie principale')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('city.name')
                     ->label('Ville')
                     ->sortable(),
@@ -211,6 +194,21 @@ class ProviderResource extends Resource
                         default => $state,
                     })
                     ->sortable(),
+                Tables\Columns\BadgeColumn::make('is_verified')
+                    ->label('Vérification')
+                    ->formatStateUsing(function (bool $state, Provider $record): string {
+                        if ($record->verification_status === 'pending') {
+                            return 'Non vérifié';
+                        }
+                        return $state ? 'Certifié' : 'Non certifié';
+                    })
+                    ->color(function (bool $state, Provider $record): string {
+                        if ($record->verification_status === 'pending') {
+                            return 'warning';
+                        }
+                        return $state ? 'success' : 'danger';
+                    })
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('base_price')
                     ->label('Prix de base')
                     ->money('XOF')
@@ -228,81 +226,78 @@ class ProviderResource extends Resource
                         'pending' => 'En attente',
                         'approved' => 'Approuvé',
                         'rejected' => 'Rejeté',
+                    ]),
+                Tables\Filters\SelectFilter::make('city_id')
+                    ->label('Ville')
+                    ->relationship('city', 'name')
+                    ->searchable(),
+                Tables\Filters\SelectFilter::make('category_id')
+                    ->label('Catégorie principale')
+                    ->relationship('category', 'name')
+                    ->searchable(),
+                Tables\Filters\Filter::make('created_at')
+                    ->form([
+                        \Filament\Forms\Components\DatePicker::make('from')->label('Inscrit du'),
+                        \Filament\Forms\Components\DatePicker::make('to')->label('Inscrit jusqu\'au'),
                     ])
-                    ->default('pending'),
+                    ->query(function ($query, $data) {
+                        return $query
+                            ->when($data['from'], fn ($q, $date) => $q->whereDate('created_at', '>=', $date))
+                            ->when($data['to'], fn ($q, $date) => $q->whereDate('created_at', '<=', $date));
+                    }),
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
-                Action::make('approve')
+                Tables\Actions\Action::make('approve')
                     ->label('Approuver')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
                     ->requiresConfirmation()
-                    ->visible(fn ($record) => $record->verification_status !== 'approved')
+                    ->visible(fn (Provider $record) => $record->verification_status !== 'approved')
                     ->action(function (Provider $record) {
-                        $userId = auth()->user()?->id;
-                        if (!$userId) {
-                            return;
-                        }
-                        
-                        // Ensure user is loaded
-                        if (!$record->relationLoaded('user')) {
-                            $record->load('user');
-                        }
-                        
-                        if (!$record->user) {
-                            return;
-                        }
-                        
                         $record->update([
                             'verification_status' => 'approved',
-                            'verified_at' => now(),
-                            'verified_by' => $userId,
                             'is_verified' => true,
+                            'verified_at' => now(),
+                            'verified_by' => Auth::id(),
                         ]);
-                        Notification::send($record->user, new ProviderApprovedNotification());
+
+                        if ($record->user) {
+                            $record->user->notify(new ProviderApprovedNotification($record));
+                        }
+
+                        \Filament\Notifications\Notification::make()
+                            ->title('Prestataire approuvé')
+                            ->success()
+                            ->send();
                     }),
-                Action::make('reject')
+                Tables\Actions\Action::make('reject')
                     ->label('Rejeter')
                     ->icon('heroicon-o-x-circle')
                     ->color('danger')
-                    ->requiresConfirmation()
-                    ->visible(fn ($record) => $record->verification_status !== 'rejected')
                     ->form([
                         Forms\Components\Textarea::make('rejection_reason')
                             ->label('Raison du rejet')
-                            ->helperText('Expliquez pourquoi le prestataire a été rejeté (sera visible par le prestataire).')
                             ->required(),
                     ])
+                    ->visible(fn (Provider $record) => $record->verification_status !== 'approved')
                     ->action(function (Provider $record, array $data) {
-                        $userId = auth()->user()?->id;
-                        if (!$userId) {
-                            return;
-                        }
-                        
-                        // Ensure user is loaded
-                        if (!$record->relationLoaded('user')) {
-                            $record->load('user');
-                        }
-                        
-                        if (!$record->user) {
-                            return;
-                        }
-                        
                         $record->update([
                             'verification_status' => 'rejected',
                             'rejection_reason' => $data['rejection_reason'],
-                            'verified_at' => now(),
-                            'verified_by' => $userId,
                             'is_verified' => false,
                         ]);
-                        Notification::send($record->user, new ProviderRejectedNotification($record, $data['rejection_reason']));
+
+                        if ($record->user) {
+                            $record->user->notify(new ProviderRejectedNotification($record, $data['rejection_reason']));
+                        }
+
+                        \Filament\Notifications\Notification::make()
+                            ->title('Prestataire rejeté')
+                            ->warning()
+                            ->send();
                     }),
-                Action::make('Contacter')
-                    ->icon('heroicon-o-chat-bubble-left-right')
-                    ->color('info')
-                    ->url(fn ($record) => route('messages.show', ['user' => $record->user_id]))
-                    ->openUrlInNewTab(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -316,6 +311,11 @@ class ProviderResource extends Resource
         return [
             RelationManagers\EventsRelationManager::class,
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery();
     }
 
     public static function getPages(): array

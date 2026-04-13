@@ -28,7 +28,9 @@ class ContactMessageMail extends Mailable
         // On utilise le nom du client comme expéditeur pour l'affichage
         return $this->from(config('mail.from.address'), $this->contactData['name'])
                     ->replyTo($this->contactData['email'], $this->contactData['name'])
-                    ->subject('Up Fiesta - Contact : ' . $this->contactData['subject'])
+                    ->subject('Upfiesta - Contact : ' . $this->contactData['subject'])
                     ->view('emails.contact-message');
     }
 }
+
+

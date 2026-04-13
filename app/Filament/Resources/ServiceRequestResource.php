@@ -141,11 +141,23 @@ class ServiceRequestResource extends Resource
                     ->dateTime()
                     ->sortable()
                     ->label('Date de demande'),
+                Tables\Columns\BadgeColumn::make('viewed_at')
+                    ->label('Nouveau')
+                    ->color('info')
+                    ->formatStateUsing(fn ($state) => is_null($state) ? 'Nouveau' : null)
+                    ->visible(fn ($record) => is_null($record?->viewed_at)),
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([
                 //
             ])
             ->actions([
+                Tables\Actions\ViewAction::make()
+                    ->after(function (ServiceRequest $record) {
+                        if (is_null($record->viewed_at)) {
+                            $record->update(['viewed_at' => now()]);
+                        }
+                    }),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
@@ -161,6 +173,7 @@ class ServiceRequestResource extends Resource
         return [
             'index' => Pages\ListServiceRequests::route('/'),
             'create' => Pages\CreateServiceRequest::route('/create'),
+            'view' => Pages\ViewServiceRequest::route('/{record}'),
             'edit' => Pages\EditServiceRequest::route('/{record}/edit'),
         ];
     }

@@ -73,7 +73,7 @@ class ProviderResource extends Resource
                             ->label('Logo ou Photo de couverture')
                             ->image()
                             ->disk('public')
-                            ->directory('providers-logos'),
+                            ->directory('providers/logos'),
                         Forms\Components\Grid::make(2)
                             ->schema([
                                 Forms\Components\TextInput::make('base_price')

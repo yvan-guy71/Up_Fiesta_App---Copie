@@ -26,6 +26,9 @@ class Provider extends Model
         'verified_by',
         'base_price',
         'price_range_max',
+        'pending_base_price',
+        'pending_price_range_max',
+        'price_change_status', // 'none', 'pending', 'rejected'
         'cni_number',
         'years_of_experience',
         'cni_photo_front',
@@ -36,32 +39,59 @@ class Provider extends Model
         'company_proof_doc_back',
     ];
 
+    // On ajoute 'logo_url' à l'export JSON automatiquement
+    protected $appends = ['logo_url'];
+
+    /**
+     * Accesseur pour obtenir l'URL complète du logo
+     */
+    public function getLogoUrlAttribute()
+    {
+        if (empty($this->logo)) {
+            return null;
+        }
+
+        // Si le logo est déjà une URL complète
+        if (filter_var($this->logo, FILTER_VALIDATE_URL)) {
+            return $this->logo;
+        }
+
+        // Nettoyage du chemin
+        $path = ltrim($this->logo, '/');
+
+        // S'assurer que le chemin contient 'storage/'
+        if (!str_starts_with($path, 'storage/')) {
+            $path = 'storage/' . $path;
+        }
+
+        // Forcer l'utilisation de APP_URL défini dans le .env pour éviter localhost
+        $baseUrl = rtrim(env('APP_URL', 'https://upfiesta.com'), '/');
+
+        return $baseUrl . '/' . $path;
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function verifiedBy(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'verified_by');
-    }
-
     protected $casts = [
         'is_verified' => 'boolean',
+        'is_mentor' => 'boolean',
         'is_company' => 'boolean',
         'base_price' => 'decimal:2',
         'price_range_max' => 'decimal:2',
         'verified_at' => 'datetime',
     ];
 
-    public function categories(): BelongsToMany
-    {
-        return $this->belongsToMany(ServiceCategory::class, 'category_provider');
-    }
-
     public function category(): BelongsTo
     {
         return $this->belongsTo(ServiceCategory::class, 'category_id');
+    }
+
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(ServiceCategory::class, 'category_provider', 'provider_id', 'service_category_id');
     }
 
     public function city(): BelongsTo
@@ -69,21 +99,9 @@ class Provider extends Model
         return $this->belongsTo(City::class);
     }
 
-    public function events(): BelongsToMany
-    {
-        return $this->belongsToMany(Event::class)
-            ->withPivot('status')
-            ->withTimestamps();
-    }
-
     public function reviews(): HasMany
     {
         return $this->hasMany(Review::class);
-    }
-
-    public function bookings(): HasMany
-    {
-        return $this->hasMany(Booking::class);
     }
 
     public function media(): HasMany
@@ -91,28 +109,13 @@ class Provider extends Model
         return $this->hasMany(ProviderMedia::class)->orderBy('sort_order');
     }
 
-    /**
-     * Check if provider is approved
-     */
-    public function isApproved(): bool
+    public function bookings(): HasMany
     {
-        return $this->verification_status === 'approved';
+        return $this->hasMany(Booking::class);
     }
 
-    /**
-     * Check if provider is rejected
-     */
-    public function isRejected(): bool
+    public function events(): BelongsToMany
     {
-        return $this->verification_status === 'rejected';
-    }
-
-    /**
-     * Check if provider is pending verification
-     */
-    public function isPending(): bool
-    {
-        return $this->verification_status === 'pending';
+        return $this->belongsToMany(Event::class, 'event_provider');
     }
 }
-

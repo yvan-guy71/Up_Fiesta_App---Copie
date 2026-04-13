@@ -60,8 +60,9 @@ class AssignmentRejectedNotification extends Notification implements ShouldQueue
             'service_request_id' => $this->assignedService->service_request_id,
             'provider_name' => $this->assignedService->provider->name,
             'rejection_reason' => $this->assignedService->rejection_reason,
-            'message' => 'Le prestataire ' . $this->assignedService->provider->name . ' a refusé votre demande "' . $this->assignedService->serviceRequest->subject . '".',
+            'message' => 'Le prestataire ' . $this->assignedService->provider->name . ' a refusé votre demande pour la raison suivante: ' . ($this->assignedService->rejection_reason ?? 'Non spécifiée'),
             'action_url' => '/mes-demandes/' . $this->assignedService->service_request_id,
+            'is_rejection' => true,
         ];
     }
 }

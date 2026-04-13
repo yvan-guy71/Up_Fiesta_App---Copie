@@ -13,7 +13,7 @@ class PaymentService
     public static function initializePayment($booking, $method)
     {
         $amount = (int) $booking->total_price;
-        $description = "Paiement Up Fiesta - Reservation #" . $booking->id;
+        $description = "Paiement Upfiesta - Reservation #" . $booking->id;
         $reference = 'UPF-' . $booking->id . '-' . time();
         $currency = 'XOF';
 
@@ -87,3 +87,6 @@ class PaymentService
         return false;
     }
 }
+
+
+

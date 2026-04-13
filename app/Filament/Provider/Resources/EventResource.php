@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 use App\Notifications\EventParticipationStatusNotification;
 use Filament\Notifications\Notification as FilamentNotification;
+use Illuminate\Support\Facades\Auth;
 
 class EventResource extends Resource
 {
@@ -95,7 +96,10 @@ class EventResource extends Resource
                     ->requiresConfirmation()
                     ->visible(fn (Event $record): bool => ($record->pivot_status ?? 'pending') === 'pending')
                     ->action(function (Event $record) {
-                        $provider = auth()->user()->provider;
+                        $provider = Auth::user()?->provider;
+                        
+                        if (!$provider) return;
+                        
                         $record->providers()->updateExistingPivot($provider->id, [
                             'status' => 'confirmed'
                         ]);
@@ -106,6 +110,7 @@ class EventResource extends Resource
                         }
 
                         // Notifier tous les administrateurs
+                        /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $admins */
                         $admins = \App\Models\User::where('role', 'admin')->get();
                         foreach ($admins as $admin) {
                             $admin->notify(new EventParticipationStatusNotification($record, $provider, 'confirmed'));
@@ -123,7 +128,10 @@ class EventResource extends Resource
                     ->requiresConfirmation()
                     ->visible(fn (Event $record): bool => ($record->pivot_status ?? 'pending') === 'pending')
                     ->action(function (Event $record) {
-                        $provider = auth()->user()->provider;
+                        $provider = Auth::user()?->provider;
+                        
+                        if (!$provider) return;
+                        
                         $record->providers()->updateExistingPivot($provider->id, [
                             'status' => 'cancelled'
                         ]);
@@ -134,6 +142,7 @@ class EventResource extends Resource
                         }
 
                         // Notifier tous les administrateurs
+                        /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $admins */
                         $admins = \App\Models\User::where('role', 'admin')->get();
                         foreach ($admins as $admin) {
                             $admin->notify(new EventParticipationStatusNotification($record, $provider, 'cancelled'));
@@ -149,7 +158,7 @@ class EventResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        $provider = auth()->user()->provider;
+        $provider = Auth::user()?->provider;
 
         if (!$provider) {
             return parent::getEloquentQuery()->whereRaw('1 = 0');

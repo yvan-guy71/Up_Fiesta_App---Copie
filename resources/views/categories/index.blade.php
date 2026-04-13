@@ -47,24 +47,6 @@
             <p class="text-slate-500 dark:text-slate-400 text-lg">Trouvez le professionnel idéal pour tous vos besoins au Togo.</p>
         </div>
 
-        <!-- Filtres par type -->
-        <div class="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-12">
-            <a href="{{ route('categories.index') }}"
-               class="px-4 sm:px-6 py-3 rounded-2xl font-bold transition text-center {{ !$kind ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100 dark:shadow-indigo-900/50' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700' }}">
-                Toutes
-            </a>
-            <a href="{{ route('categories.index', ['kind' => 'prestations']) }}"
-               class="px-4 sm:px-6 py-3 rounded-2xl font-bold transition text-center {{ $kind === 'prestations' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100 dark:shadow-indigo-900/50' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700' }}">
-                <span class="hidden sm:inline">{{ __('messages.categories.kind_prestations') }} (Événementiel)</span>
-                <span class="sm:hidden">Événementiel</span>
-            </a>
-            <a href="{{ route('categories.index', ['kind' => 'domestiques']) }}"
-               class="px-4 sm:px-6 py-3 rounded-2xl font-bold transition text-center {{ $kind === 'domestiques' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100 dark:shadow-indigo-900/50' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700' }}">
-                <span class="hidden sm:inline">{{ __('messages.categories.kind_domestiques') }}</span>
-                <span class="sm:hidden">Services à domicile</span>
-            </a>
-        </div>
-
         <!-- Grille des catégories avec prestataires -->
         <div class="space-y-24">
             @foreach($categories as $category)
@@ -79,27 +61,14 @@
                         'maquillage-coiffure' => 'images/categories/coiffure.jpg',
                         'location-voiture' => 'images/categories/voiture.jpeg',
                         'hotesse-accueil' => 'images/categories/hotesse.jpg',
-                        'maconnerie' => 'images/categories/macon.webp',
-                        'menuiserie' => 'images/categories/menuisier.jpg',
-                        'cuisinier-domicile' => 'images/categories/cuisinier.webp',
-                        'plomberie' => 'images/categories/plombier.jpg',
-                        'electricite' => 'images/categories/electricien.webp',
-                        'peinture' => 'images/categories/peintre.jpg',
-                        'climatisation' => 'images/categories/clim.jpg',
-                        'entretien-nettoyage' => 'images/categories/nettoyage.webp',
-                        'mecanique' => 'images/categories/mecanique.jpeg',
-                        'transport-logistique' => 'images/categories/transport.jpeg',
                     ];
                     $imagePath = $categoryImages[$category->slug] ?? 'images/categories/default.jpg';
                 @endphp
                 <div id="category-{{ $category->id }}" class="scroll-mt-24">
                     <div class="relative h-48 md:h-64 rounded-3xl overflow-hidden mb-8 shadow-lg">
                         <img src="{{ asset($imagePath) }}" alt="{{ $category->name }}" class="w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent flex items-center">
+                        <div class="absolute inset-0 flex items-center">
                             <div class="px-8 md:px-12">
-                                <span class="inline-block px-3 py-1 bg-indigo-600 text-white text-xs font-bold rounded-full mb-3 uppercase tracking-widest">
-                                    {{ $category->kind === 'prestations' ? 'Événementiel' : 'Service Domestique' }}
-                                </span>
                                 <h2 class="text-3xl md:text-4xl font-black text-white mb-2">{{ $category->name }}</h2>
                                 <p class="text-indigo-100 font-medium">{{ $category->providers_count }} professionnel(s) disponible(s)</p>
                             </div>

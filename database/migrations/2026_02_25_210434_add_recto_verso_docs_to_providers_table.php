@@ -21,8 +21,18 @@ return new class extends Migration
             }
 
             // Ajouter les colonnes pour le verso
-            $table->string('cni_photo_back')->nullable()->after('cni_photo_front');
-            $table->string('company_proof_doc_back')->nullable()->after('company_proof_doc_front');
+            if (! Schema::hasColumn('providers', 'cni_photo_front')) {
+                $table->string('cni_photo_front')->nullable();
+            }
+            if (! Schema::hasColumn('providers', 'cni_photo_back')) {
+                $table->string('cni_photo_back')->nullable();
+            }
+            if (! Schema::hasColumn('providers', 'company_proof_doc_front')) {
+                $table->string('company_proof_doc_front')->nullable();
+            }
+            if (! Schema::hasColumn('providers', 'company_proof_doc_back')) {
+                $table->string('company_proof_doc_back')->nullable();
+            }
         });
     }
 

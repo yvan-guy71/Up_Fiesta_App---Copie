@@ -28,34 +28,26 @@ class BookingReviewService
     }
 
     /**
-     * Vérifie le service par l'admin et applique les réductions le cas échéant
+     * Vérifie le service par l'admin après la fin du service et l'avis du client
      */
-    public function verifyBookingByAdmin(Booking $booking, int $adminId, bool $applyCommissionReduction = true): void
+    public function verifyBookingByAdmin(Booking $booking, int $adminId): void
     {
         if ($booking->admin_verification_status === 'verified') {
             return; // Déjà vérifié
         }
 
-        // Calculer la réduction de commission (-15%)
-        $commissionReduction = 0;
-        if ($applyCommissionReduction && $booking->provider_amount > 0) {
-            $commissionReduction = $booking->provider_amount * 0.15;
-            $newProviderAmount = $booking->provider_amount - $commissionReduction;
-        } else {
-            $newProviderAmount = $booking->provider_amount;
-        }
+        // UpFiesta juge la qualité du service et du prestataire
+        // Plus de gestion de commission ou de payout ici, car le paiement est direct
 
         // Mettre à jour le booking avec le statut de vérification
         $booking->update([
             'admin_verification_status' => 'verified',
             'admin_verified_at' => now(),
             'admin_verified_by' => $adminId,
-            'provider_commission_reduction' => $commissionReduction,
-            'provider_amount' => $newProviderAmount,
-            'payout_status' => 'ready', // Marquer comme prêt pour le payout
+            'payout_status' => 'completed', // Marqué comme complété au niveau administratif
         ]);
 
-        // Notifier le prestataire
+        // Notifier le prestataire que son service a été validé par l'admin
         $booking->provider->notify(new BookingVerifiedByAdminNotification($booking));
     }
 

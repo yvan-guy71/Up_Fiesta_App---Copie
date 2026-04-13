@@ -12,16 +12,13 @@ class ServiceCategoryController extends Controller
      */
     public function index(Request $request)
     {
-        $kind = $request->get('kind');
+        // Only prestations (event services) are supported
+        $kind = ServiceCategory::KIND_PRESTATIONS;
         $query = ServiceCategory::query()->with(['providers' => function($q) {
             $q->with(['city', 'category'])->where('is_verified', true)->latest();
         }])->withCount(['providers' => function($q) {
             $q->where('is_verified', true);
-        }]);
-
-        if ($kind && in_array($kind, [ServiceCategory::KIND_PRESTATIONS, ServiceCategory::KIND_DOMESTIQUES])) {
-            $query->where('kind', $kind);
-        }
+        }])->where('kind', $kind);
 
         $categories = $query->get();
 

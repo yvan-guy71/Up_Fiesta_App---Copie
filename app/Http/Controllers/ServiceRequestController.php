@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Message;
 use App\Models\Provider;
+use App\Models\ServiceCategory;
 use App\Models\ServiceRequest;
 use App\Models\User;
 use App\Notifications\ServiceRequestCreatedNotification;
@@ -26,37 +28,36 @@ class ServiceRequestController extends Controller
             $selectedProvider = Provider::find($request->provider_id);
 
             if ($selectedProvider && ! $selectedProvider->is_verified) {
-                session()->flash('warning', 'Ce prestataire n\'est pas encore vérifié par Up Fiesta. Vous pouvez continuer, mais nous vous recommandons de privilégier les prestataires vérifiés.');
+                session()->flash('warning', 'Ce prestataire n\'est pas encore vérifié par Upfiesta. Vous pouvez continuer, mais nous vous recommandons de privilégier les prestataires vérifiés.');
             }
         }
 
-        // optional kind filter (prestations/domestiques)
+        // Only prestations (event services) are supported
         $kind = $request->query('kind');
         $query = Provider::with(['categories', 'category', 'city']);
-        if (in_array($kind, [\App\Models\ServiceCategory::KIND_PRESTATIONS, \App\Models\ServiceCategory::KIND_DOMESTIQUES], true)) {
-            $query->where(function($q) use ($kind) {
-                $q->whereHas('category', function ($sq) use ($kind) {
-                    $sq->where('kind', $kind);
-                })->orWhereHas('categories', function ($sq) use ($kind) {
-                    $sq->where('kind', $kind);
-                });
+        $query->where(function($q) {
+            $q->whereHas('category', function ($sq) {
+                $sq->where('kind', 'prestations');
+            })->orWhereHas('categories', function ($sq) {
+                $sq->where('kind', 'prestations');
             });
-        }
+        });
         $providers = $query->get();
 
-        return view('service_requests.create', compact('selectedProvider', 'providers', 'kind'));
+        $categories = ServiceCategory::where('kind', 'prestations')->orderBy('name')->get();
+
+        return view('service_requests.create', compact('selectedProvider', 'providers', 'kind', 'categories'));
     }
 
     public function store(Request $request)
     {
         $type = $request->input('type') === 'event' ? 'event' : 'service';
-        $kind = in_array($request->input('kind'), [\App\Models\ServiceRequest::KIND_DOMESTIQUES, \App\Models\ServiceRequest::KIND_PRESTATIONS])
-            ? $request->input('kind')
-            : \App\Models\ServiceRequest::KIND_PRESTATIONS;
+        // Only prestations (event services) are supported
+        $kind = \App\Models\ServiceRequest::KIND_PRESTATIONS;
 
         $rules = [
             'type' => 'nullable|in:service,event',
-            'kind' => 'nullable|in:prestations,domestiques',
+            'kind' => 'nullable|in:prestations',
             'subject' => 'required|string|max:255',
             'description' => 'required|string',
             'event_date' => 'required|date',
@@ -126,11 +127,25 @@ class ServiceRequestController extends Controller
                 }
             }
 
-            // Provider will be notified only when admin assigns the service to them
+            // Provider will be notified immediately if selected
+            if ($providerId) {
+                $provider = Provider::find($providerId);
+                if ($provider && $provider->user) {
+                    $provider->user->notify(new \App\Notifications\ServiceRequestDirectNotification($serviceRequest));
+                    
+                    Message::create([
+                        'sender_id' => Auth::id(),
+                        'receiver_id' => $provider->user->id,
+                        'content' => "Nouvelle demande directe pour : " . $serviceRequest->subject . ". " . $description,
+                    ]);
+                }
+            }
 
             $message = $type === 'event'
-                ? "Votre demande d'événement a bien été envoyée. Up-Fiesta se charge de tout, nous contactons les prestataires pour vous."
-                : "Votre demande de service a bien été envoyée. Up-Fiesta se charge de tout, nous contactons les prestataires pour vous.";
+                ? "Votre demande d'événement a bien été envoyée. Upfiesta se charge de tout, nous contactons les prestataires pour vous."
+                : ($providerId 
+                    ? "Votre demande a été envoyée au prestataire. Il vous contactera prochainement."
+                    : "Votre demande a été envoyée à Upfiesta. Nous vous aiderons à trouver le meilleur prestataire.");
 
             return redirect()
                 ->route('home')
@@ -142,8 +157,26 @@ class ServiceRequestController extends Controller
 
             return back()
                 ->withInput()
-                ->with('error', "Une erreur est survenue lors de l'envoi de votre demande. Merci de réessayer ou de contacter Up-Fiesta.");
+                ->with('error', "Une erreur est survenue lors de l'envoi de votre demande. Merci de réessayer ou de contacter Upfiesta.");
         }
+    }
+
+    /**
+     * Display a list of service requests for the authenticated client.
+     */
+    public function index()
+    {
+        $user = Auth::user();
+        if ($user->role !== 'client') {
+            abort(403);
+        }
+
+        $requests = ServiceRequest::where('user_id', $user->id)
+            ->with(['provider', 'assignedServices.provider'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        return view('service_requests.index', compact('requests'));
     }
 
     /**
@@ -218,3 +251,6 @@ class ServiceRequestController extends Controller
         return back()->with('success', 'Statut mis à jour.');
     }
 }
+
+
+

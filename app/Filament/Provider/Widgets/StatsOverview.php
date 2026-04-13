@@ -20,9 +20,7 @@ class StatsOverview extends BaseWidget
 
         $totalBookings = $provider->bookings()->count();
         $pendingBookings = $provider->bookings()->where('status', 'pending')->count();
-        $totalRevenue = $provider->bookings()
-            ->where('payment_status', 'paid')
-            ->sum('provider_amount');
+        $completedBookings = $provider->bookings()->where('status', 'completed')->count();
 
         return [
             Stat::make('Total Réservations', $totalBookings)
@@ -33,9 +31,9 @@ class StatsOverview extends BaseWidget
                 ->description('Nécessitent votre attention')
                 ->descriptionIcon('heroicon-m-clock')
                 ->color('warning'),
-            Stat::make('Revenu Total', number_format($totalRevenue, 0, ',', ' ') . ' XOF')
-                ->description('Basé sur les réservations payées')
-                ->descriptionIcon('heroicon-m-banknotes')
+            Stat::make('Services terminés', $completedBookings)
+                ->description('Missions réalisées avec succès')
+                ->descriptionIcon('heroicon-m-check-circle')
                 ->color('success'),
         ];
     }

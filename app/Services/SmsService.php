@@ -34,7 +34,7 @@ class SmsService
     public static function notifyNewBooking($booking)
     {
         $provider = $booking->provider;
-        $message = "Up Fiesta: Nouvelle demande de reservation pour le " . $booking->event_date->format('d/m/Y') . ". Connectez-vous pour confirmer.";
+        $message = "Upfiesta: Nouvelle demande de reservation pour le " . $booking->event_date->format('d/m/Y') . ". Connectez-vous pour confirmer.";
         
         if ($provider && $provider->phone) {
             self::send($provider->phone, $message);
@@ -44,10 +44,13 @@ class SmsService
     public static function notifyPaymentRequested($booking)
     {
         $client = $booking->user;
-        $message = "Up Fiesta: Votre reservation #" . $booking->id . " est confirmee ! Vous pouvez maintenant proceder au paiement sur votre espace client.";
+        $message = "Upfiesta: Votre reservation #" . $booking->id . " est confirmee ! Vous pouvez maintenant proceder au paiement sur votre espace client.";
         
         if ($client && $client->phone) {
             self::send($client->phone, $message);
         }
     }
 }
+
+
+

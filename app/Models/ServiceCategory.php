@@ -11,11 +11,9 @@ class ServiceCategory extends Model
 {
     // types of categories for organizational purposes
     public const KIND_PRESTATIONS = 'prestations';
-    public const KIND_DOMESTIQUES = 'domestiques';
 
     public static array $kinds = [
         self::KIND_PRESTATIONS,
-        self::KIND_DOMESTIQUES,
     ];
 
     protected $fillable = [

@@ -29,7 +29,7 @@ class AuthController extends Controller
 
             if (!$user) {
                 return redirect()->route('login')->withErrors([
-                    'email' => 'Aucun compte Up Fiesta n\'est associé à cet email Google. Veuillez d\'abord vous inscrire.',
+                    'email' => 'Aucun compte Upfiesta n\'est associé à cet email Google. Veuillez d\'abord vous inscrire.',
                 ]);
             }
 
@@ -176,7 +176,7 @@ class AuthController extends Controller
         // Redirect back to the login page with a message since the verification notice
         // route is protected by the auth middleware and they are currently a guest.
         return redirect()->route('login')
-            ->with('success', 'Bienvenue sur Up Fiesta ! Un email de confirmation vous a été envoyé. Cliquez sur le lien pour activer votre compte, puis connectez-vous.');
+            ->with('success', 'Bienvenue sur Upfiesta ! Un email de confirmation vous a été envoyé. Cliquez sur le lien pour activer votre compte, puis connectez-vous.');
     }
 
     public function logout(Request $request)
@@ -292,3 +292,6 @@ class AuthController extends Controller
             ->with('info', 'Bienvenue ! Votre compte prestataire a été créé. Un email de confirmation vous a été envoyé. Vérifiez votre boîte pour activer votre compte. Votre profil restera en attente de validation.');
     }
 }
+
+
+

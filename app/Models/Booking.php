@@ -33,6 +33,8 @@ class Booking extends Model
         'admin_verified_at',
         'admin_verified_by',
         'provider_commission_reduction',
+        'rejection_reason',
+        'provider_response_at',
     ];
 
     protected $casts = [
@@ -44,6 +46,7 @@ class Booking extends Model
         'client_review_requested_at' => 'datetime',
         'admin_verified_at' => 'datetime',
         'provider_commission_reduction' => 'decimal:2',
+        'provider_response_at' => 'datetime',
     ];
 
     public function user(): BelongsTo

@@ -43,16 +43,19 @@ class BookingResource extends Resource
                     ->boolean(),
                 Tables\Columns\IconColumn::make('review.id')->label('Noté')
                     ->boolean()
-                    ->state(fn (Booking $r) => $r->review()->exists()),
+                    ->state(fn (Booking $r) => $r->review()->exists())
+                    ->tooltip(fn (Booking $r) => $r->review?->comment),
+                Tables\Columns\TextColumn::make('review.rating')->label('Note')
+                    ->badge()
+                    ->color(fn ($state) => $state >= 4 ? 'success' : ($state >= 2 ? 'warning' : 'danger'))
+                    ->formatStateUsing(fn ($state) => $state ? $state . ' ★' : null)
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('admin_verification_status')->label('Vérification')->badge()
                     ->color(fn (string $state) => match ($state) {
                         'verified' => 'success', 'pending' => 'warning', default => 'gray',
                     }),
-                Tables\Columns\TextColumn::make('platform_fee')->label('Frais')->money('XOF'),
-                Tables\Columns\TextColumn::make('provider_amount')->label('À verser')->money('XOF'),
-                Tables\Columns\TextColumn::make('provider_commission_reduction')->label('Réduction')->money('XOF'),
-                Tables\Columns\TextColumn::make('payout_status')->label('Versement')->badge()
-                    ->color(fn (string $state) => match ($state) { 'paid' => 'success', 'pending' => 'warning', default => 'gray' }),
+                Tables\Columns\TextColumn::make('payout_status')->label('Finalisation Admin')->badge()
+                    ->color(fn (string $state) => match ($state) { 'completed' => 'success', 'pending' => 'warning', default => 'gray' }),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')->options([
@@ -61,6 +64,40 @@ class BookingResource extends Resource
                 Tables\Filters\SelectFilter::make('payment_status')->label('Paiement')->options([
                     'unpaid' => 'Non payé', 'pending' => 'En attente', 'paid' => 'Payé',
                 ]),
+                Tables\Filters\SelectFilter::make('provider_id')
+                    ->label('Prestataire')
+                    ->relationship('provider', 'name')
+                    ->searchable(),
+                Tables\Filters\SelectFilter::make('city_id')
+                    ->label('Ville')
+                    ->relationship('provider.city', 'name')
+                    ->searchable(),
+                Tables\Filters\SelectFilter::make('admin_verification_status')
+                    ->label('Vérification')
+                    ->options([
+                        'pending' => 'En attente',
+                        'verified' => 'Vérifié',
+                    ]),
+                Tables\Filters\Filter::make('event_date')
+                    ->form([
+                        \Filament\Forms\Components\DatePicker::make('from')->label('Du'),
+                        \Filament\Forms\Components\DatePicker::make('to')->label('Au'),
+                    ])
+                    ->query(function ($query, $data) {
+                        return $query
+                            ->when($data['from'], fn ($q, $date) => $q->whereDate('event_date', '>=', $date))
+                            ->when($data['to'], fn ($q, $date) => $q->whereDate('event_date', '<=', $date));
+                    }),
+                Tables\Filters\Filter::make('total_price')
+                    ->form([
+                        \Filament\Forms\Components\TextInput::make('min')->label('Prix min')->numeric(),
+                        \Filament\Forms\Components\TextInput::make('max')->label('Prix max')->numeric(),
+                    ])
+                    ->query(function ($query, $data) {
+                        return $query
+                            ->when($data['min'], fn ($q, $min) => $q->where('total_price', '>=', $min))
+                            ->when($data['max'], fn ($q, $max) => $q->where('total_price', '<=', $max));
+                    }),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
@@ -73,46 +110,43 @@ class BookingResource extends Resource
                     ->action(function (Booking $r) {
                         $r->update(['status' => 'confirmed']);
                         
-                        // Notify client to pay
-                        try {
-                            \App\Services\SmsService::notifyPaymentRequested($r);
-                        } catch (\Exception $e) {
-                            \Illuminate\Support\Facades\Log::error("Erreur SMS paiement: " . $e->getMessage());
-                        }
-
                         \Filament\Notifications\Notification::make()
                             ->title('Réservation confirmée')
-                            ->body('Le client a été notifié pour procéder au paiement.')
+                            ->body('La réservation est confirmée.')
                             ->success()
                             ->send();
                     }),
                 Tables\Actions\Action::make('verify_by_admin')
-                    ->label('Vérifier le travail')
+                    ->label('Vérifier la qualité')
                     ->icon('heroicon-o-shield-check')
                     ->color('warning')
                     ->requiresConfirmation()
-                    ->modalHeading('Vérifier le travail du prestataire')
-                    ->modalDescription('Cette action appliquera une réduction de 15% au montant du prestataire et marquera la tâche comme vérifiée.')
-                    ->visible(fn (Booking $r) => $r->status === 'confirmed' && $r->payment_status === 'paid' && $r->provider_done && $r->admin_verification_status === 'pending')
+                    ->modalHeading('Vérifier la qualité du service')
+                    ->modalDescription('Cette action valide la qualité du service rendu pour nos statistiques et la sélection des meilleurs prestataires.')
+                    ->visible(fn (Booking $r) => $r->provider_done && $r->admin_verification_status === 'pending')
                     ->action(function (Booking $r) {
                         $reviewService = app(\App\Services\BookingReviewService::class);
-                        $reviewService->verifyBookingByAdmin($r, auth()->id(), true);
+                        $reviewService->verifyBookingByAdmin($r, auth()->user()?->id);
                         
                         \Filament\Notifications\Notification::make()
                             ->title('Travail vérifié')
-                            ->body('Le travail du prestataire a été vérifié. Une réduction de 15% a été appliquée.')
+                            ->body('Le travail du prestataire a été vérifié pour contrôle qualité.')
                             ->success()
                             ->send();
                     }),
-                Tables\Actions\Action::make('complete_and_payout')
-                    ->label('Terminer et payer le prestataire')
+                Tables\Actions\Action::make('complete_admin')
+                    ->label('Marquer comme terminé')
                     ->icon('heroicon-o-check-badge')
                     ->color('success')
                     ->requiresConfirmation()
-                    ->visible(fn (Booking $r) => $r->status === 'confirmed' && $r->payment_status === 'paid' && $r->provider_done && $r->payout_status !== 'paid' && $r->admin_verification_status === 'verified')
+                    ->visible(fn (Booking $r) => $r->status === 'confirmed' && $r->provider_done && $r->admin_verification_status === 'verified' && $r->status !== 'completed')
                     ->action(function (Booking $r) {
                         $r->update(['status' => 'completed']);
-                        PayoutService::transfer($r);
+                        \Filament\Notifications\Notification::make()
+                            ->title('Statut mis à jour')
+                            ->body('La réservation est maintenant marquée comme terminée.')
+                            ->success()
+                            ->send();
                     }),
                 Tables\Actions\Action::make('cancel')
                     ->label('Annuler')

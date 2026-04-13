@@ -16,7 +16,7 @@ class TogoSeeder extends Seeder
         \App\Models\User::updateOrCreate(
             ['email' => 'admin@upfiesta.tg'],
             [
-                'name' => 'Admin Up Fiesta',
+                'name' => 'Admin Upfiesta',
                 'password' => \Illuminate\Support\Facades\Hash::make(env('ADMIN_INITIAL_PASSWORD', 'Upadmin@2620!')),
                 'role' => 'admin',
             ]
@@ -32,8 +32,8 @@ class TogoSeeder extends Seeder
             ]
         );
 
-        // Créer les villes principales
-        $villes = ['Lomé', 'Kpalimé', 'Sokodé', 'Atakpamé', 'Kara', 'Dapaong', 'Aného', 'Tsevié'];
+        // Créer les villes principales (Limité à Lomé pour le moment)
+        $villes = ['Lomé'];
         foreach ($villes as $ville) {
             \App\Models\City::updateOrCreate(
                 [
@@ -44,9 +44,8 @@ class TogoSeeder extends Seeder
             );
         }
 
-        // Créer les catégories de services
+        // Créer les catégories de services (Prestations professionnelles uniquement)
         $categories = [
-            // Événementiel
             'Traiteur' => 'traiteur',
             'Décoration' => 'decoration',
             'Photographie & Vidéo' => 'photographie-video',
@@ -56,25 +55,19 @@ class TogoSeeder extends Seeder
             'Maquillage & Coiffure' => 'maquillage-coiffure',
             'Location de voiture' => 'location-voiture',
             'Hôtesse & Accueil' => 'hotesse-accueil',
-            
-            // Services Professionnels & Métiers
-            'Maçonnerie' => 'maconnerie',
-            'Menuiserie' => 'menuiserie',
-            'Cuisinier à domicile' => 'cuisinier-domicile',
-            'Plomberie' => 'plomberie',
-            'Électricité' => 'electricite',
-            'Peinture' => 'peinture',
-            'Climatisation' => 'climatisation',
-            'Entretien & Nettoyage' => 'entretien-nettoyage',
-            'Mécanique' => 'mecanique',
-            'Transport & Logistique' => 'transport-logistique',
         ];
 
         foreach ($categories as $name => $slug) {
             \App\Models\ServiceCategory::updateOrCreate(
                 ['slug' => $slug],
-                ['name' => $name]
+                [
+                    'name' => $name,
+                    'kind' => \App\Models\ServiceCategory::KIND_PRESTATIONS,
+                ]
             );
         }
     }
 }
+
+
+

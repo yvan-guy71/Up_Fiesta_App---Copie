@@ -31,7 +31,7 @@ class BookingMarkedDoneNotification extends Notification implements ShouldQueue
             ->line('Client: ' . ($this->booking->user->name ?? ''))
             ->line('Prestataire: ' . ($this->booking->provider->name ?? ''))
             ->line('Réservation #' . $this->booking->id)
-            ->action('Voir la réservation', url('/up-fiesta-kygj'));
+            ->action('Voir la réservation', url('/Upfiesta-kygj'));
     }
 
     public function toDatabase(object $notifiable): DatabaseMessage
@@ -47,3 +47,6 @@ class BookingMarkedDoneNotification extends Notification implements ShouldQueue
         ]);
     }
 }
+
+
+

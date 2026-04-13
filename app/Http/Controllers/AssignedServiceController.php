@@ -144,20 +144,22 @@ class AssignedServiceController extends Controller
             }
         }
 
-        // Admin informs client (automated notification from admin to client)
+
+        // Notifier le client (notification avec mise en relation)
         $client = $assignedService->serviceRequest->user;
+        $client->notify(new \App\Notifications\AssignmentAcceptedNotification($assignedService));
+
+        // Message texte (optionnel)
         $admin = $admins->first() ?? User::where('role', 'admin')->first();
         if ($admin) {
             Message::create([
                 'sender_id' => $admin->id,
                 'receiver_id' => $client->id,
-                'content' => "Bonne nouvelle ! Le prestataire " . $provider->name . " a accepté votre demande pour : " . $assignedService->serviceRequest->subject . ". Nous restons à votre disposition pour la suite.",
+                'content' => "Bonne nouvelle ! Le prestataire " . $provider->name . " a accepté votre demande pour : " . $assignedService->serviceRequest->subject . ". Vous pouvez maintenant échanger directement avec lui dans la page Mes réservations.",
             ]);
-            // You might want a specific notification for the client here as well
-            // $client->notify(new AssignmentAcceptedClientNotification($assignedService));
         }
 
-        return back()->with('success', 'Service assignment accepted! You can now start working on it.');
+        return back()->with('success', 'Demande acceptée ! Vous pouvez maintenant échanger avec le client.');
     }
 
     /**
@@ -178,9 +180,9 @@ class AssignedServiceController extends Controller
 
         // Create new booking with data from service request
         $totalPrice = $serviceRequest->budget ?? 0;
-        $commissionRate = config('services.commission_rate', 10); // 10% commission by default
-        $platformFee = ($totalPrice * $commissionRate) / 100;
-        $providerAmount = $totalPrice - $platformFee;
+        $commissionRate = 0; // UpFiesta is free
+        $platformFee = 0;
+        $providerAmount = $totalPrice;
 
         $booking = Booking::create([
             'user_id' => $serviceRequest->user_id,
@@ -194,8 +196,8 @@ class AssignedServiceController extends Controller
             'platform_fee' => $platformFee,
             'provider_amount' => $providerAmount,
             'status' => 'confirmed',
-            'payment_status' => 'unpaid',
-            'payout_status' => 'pending',
+            'payment_status' => 'not_applicable', // Plus de paiement via l'application
+            'payout_status' => 'completed',
         ]);
 
         return $booking;
@@ -241,8 +243,12 @@ class AssignedServiceController extends Controller
             }
         }
 
-        // Admin informs client about rejection and proposes another provider if available
+
+        // Notifier le client (notification de refus avec raison)
         $client = $assignedService->serviceRequest->user;
+        $client->notify(new \App\Notifications\AssignmentRejectedNotification($assignedService));
+
+        // Message texte (optionnel)
         $admin = $admins->first() ?? User::where('role', 'admin')->first();
         if ($admin) {
             $otherProviders = Provider::where('id', '!=', $provider->id)
@@ -266,8 +272,6 @@ class AssignedServiceController extends Controller
                 'receiver_id' => $client->id,
                 'content' => "Nous avons le regret de vous informer que le prestataire initialement choisi n'est pas disponible pour votre demande : " . $assignedService->serviceRequest->subject . ". " . $proposal,
             ]);
-            // You might want a specific notification for the client here as well
-            // $client->notify(new AssignmentRejectedClientNotification($assignedService));
         }
 
         return back()->with('success', 'Assignment rejected successfully.');

@@ -10,7 +10,7 @@ class SetLocale
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->is('up-fiesta-kygj/login')) {
+        if ($request->is('Upfiesta-kygj/login')) {
             app()->setLocale(config('app.locale'));
             return $next($request);
         }
@@ -29,3 +29,6 @@ class SetLocale
         return $next($request);
     }
 }
+
+
+

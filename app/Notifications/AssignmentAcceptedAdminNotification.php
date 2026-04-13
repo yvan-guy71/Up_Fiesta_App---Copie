@@ -26,7 +26,10 @@ class AssignmentAcceptedAdminNotification extends Notification implements Should
         return [
             'assigned_service_id' => $this->assignedService->id,
             'message' => 'Le prestataire ' . $this->assignedService->provider->name . ' a accepté la mission pour : ' . $this->assignedService->serviceRequest->subject,
-            'action_url' => '/up-fiesta-kygj/assigned-services/' . $this->assignedService->id,
+            'action_url' => '/Upfiesta-kygj/assigned-services/' . $this->assignedService->id,
         ];
     }
 }
+
+
+

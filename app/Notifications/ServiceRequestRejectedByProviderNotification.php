@@ -44,7 +44,7 @@ class ServiceRequestRejectedByProviderNotification extends Notification implemen
             ->line('Prestataire: ' . $provider->name)
             ->line('Service: ' . $this->serviceRequest->subject)
             ->when($this->rejectionReason, fn ($message) => $message->line('**Raison:** ' . $this->rejectionReason))
-            ->line('Vous pouvez sélectionner un autre prestataire ou contacter up-fiesta pour de l\'aide.');
+            ->line('Vous pouvez sélectionner un autre prestataire ou contacter Upfiesta pour de l\'aide.');
     }
 
     /**
@@ -63,3 +63,6 @@ class ServiceRequestRejectedByProviderNotification extends Notification implemen
         ];
     }
 }
+
+
+

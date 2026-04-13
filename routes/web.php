@@ -108,7 +108,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/admin/users/{id}/{page?}', function ($id, $page = 'edit') {
         $user = \Illuminate\Support\Facades\Auth::user();
         if ($user && $user->role === 'admin') {
-            return redirect("/up-fiesta-kygj/users/{$id}/{$page}");
+            return redirect("/Upfiesta-kygj/users/{$id}/{$page}");
         }
         abort(403, 'Accès non autorisé');
     });
@@ -116,7 +116,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/admin/service-requests/{id}/{page?}', function ($id, $page = 'edit') {
         $user = \Illuminate\Support\Facades\Auth::user();
         if ($user && $user->role === 'admin') {
-            return redirect("/up-fiesta-kygj/service-requests/{$id}/{$page}");
+            return redirect("/Upfiesta-kygj/service-requests/{$id}/{$page}");
         }
         abort(403, 'Accès non autorisé');
     });
@@ -129,18 +129,35 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/messages/item/{message}', [MessageController::class, 'destroy'])->name('messages.destroy');
     Route::delete('/messages/conversation/{user}', [MessageController::class, 'destroyConversation'])->name('messages.conversation.destroy');
 
+    // Debug route to check booking data
+    Route::get('/debug/bookings', function () {
+        $user = \Illuminate\Support\Facades\Auth::user();
+        if (!$user) {
+            return ['error' => 'Not authenticated'];
+        }
+        return [
+            'user_id' => $user->id,
+            'bookings_count' => \App\Models\Booking::where('user_id', $user->id)->count(),
+            'bookings' => \App\Models\Booking::where('user_id', $user->id)->select('id', 'user_id', 'provider_id', 'status', 'event_date', 'created_at')->get(),
+            'assigned_services' => \App\Models\AssignedService::whereHas('serviceRequest', fn($q) => $q->where('user_id', $user->id))->select('id', 'provider_id', 'status', 'created_at')->get(),
+        ];
+    })->middleware('auth')->name('debug.bookings');
+
     Route::get('/mes-reservations', [BookingController::class, 'index'])->name('bookings.index');
     Route::get('/mes-reservations/{id}', [BookingController::class, 'show'])->name('bookings.show')->where('id', '[0-9]+');
     Route::post('/reserver/{provider}', [BookingController::class, 'store'])->name('bookings.store');
+    Route::post('/mes-reservations/{booking}/accepter', [BookingController::class, 'acceptBooking'])->name('bookings.accept');
+    Route::post('/mes-reservations/{booking}/refuser', [BookingController::class, 'rejectBooking'])->name('bookings.reject');
     Route::post('/reserver/assignation/{assignedService}', [BookingController::class, 'createFromAssignedService'])->name('bookings.createFromAssignedService');
     Route::post('/reservations/{booking}/avis', [ReviewController::class, 'store'])->name('reviews.store');
 
-    Route::get('/paiement/{booking}/{method}', [PaymentController::class, 'checkout'])->name('payment.checkout');
-    Route::get('/paiement/callback/{booking}', [PaymentController::class, 'callback'])->name('payment.callback');
-    Route::post('/paiement/webhook', [PaymentController::class, 'webhook'])->name('payment.webhook');
+    // Route::get('/paiement/{booking}/{method}', [PaymentController::class, 'checkout'])->name('payment.checkout');
+    // Route::get('/paiement/callback/{booking}', [PaymentController::class, 'callback'])->name('payment.callback');
+    // Route::post('/paiement/webhook', [PaymentController::class, 'webhook'])->name('payment.webhook');
     
     Route::get('/demande-service', [ServiceRequestController::class, 'create'])->name('service-requests.create');
     Route::post('/demande-service', [ServiceRequestController::class, 'store'])->name('service-requests.store');
+    Route::get('/mes-demandes', [ServiceRequestController::class, 'index'])->name('service-requests.index');
     Route::get('/mes-demandes/{serviceRequest}', [ServiceRequestController::class, 'show'])->name('service-requests.show');
 
     // provider-specific list & status update
@@ -150,8 +167,11 @@ Route::middleware(['auth'])->group(function () {
         ->name('service-requests.status');
     
     // Note: Assigned Services routes are now handled by Filament Resources
-    // - Admin: /up-fiesta-kygj/assigned-services (Filament AdminPanelProvider)
+    // - Admin: /Upfiesta-kygj/assigned-services (Filament AdminPanelProvider)
     // - Provider: /prestataire/assigned-services (Filament ProviderPanelProvider)
     
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
+
+
+

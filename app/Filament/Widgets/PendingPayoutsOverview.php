@@ -8,6 +8,11 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class PendingPayoutsOverview extends BaseWidget
 {
+    public static function canView(): bool
+    {
+        return false;
+    }
+
     protected static ?int $sort = 2;
 
     protected function getStats(): array

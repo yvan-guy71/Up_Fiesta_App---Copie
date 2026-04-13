@@ -27,7 +27,7 @@ class AssignmentAcceptedNotification extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', 'mail'];
     }
 
     /**
@@ -47,7 +47,9 @@ class AssignmentAcceptedNotification extends Notification implements ShouldQueue
             ->line('**Service demandé:**')
             ->line('Sujet: ' . $serviceRequest->subject)
             ->line('Date prévue: ' . $serviceRequest->event_date->format('d/m/Y H:i'))
-            ->line('Up-Fiesta vous contactera sous peu pour finaliser les détails.');
+            ->line('**Action requise:** Vous pouvez maintenant entrer en contact avec le prestataire pour discuter des détails et commencer le service.')
+            ->action('Voir ma demande', url('/mes-reservations/' . $this->assignedService->id))
+            ->line('Upfiesta vous remercie de votre confiance.');
     }
 
     /**
@@ -61,8 +63,12 @@ class AssignmentAcceptedNotification extends Notification implements ShouldQueue
             'assigned_service_id' => $this->assignedService->id,
             'service_request_id' => $this->assignedService->service_request_id,
             'provider_id' => $this->assignedService->provider_id,
-            'message' => 'Le prestataire ' . $this->assignedService->provider->name . ' a accepté votre demande.',
+            'message' => 'Le prestataire ' . $this->assignedService->provider->name . ' a accepté votre demande. Vous pouvez maintenant le contacter pour lancer le service.',
             'action_url' => '/mes-reservations/' . $this->assignedService->id,
+            'booking_required' => false,
         ];
     }
 }
+
+
+

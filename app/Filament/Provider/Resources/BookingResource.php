@@ -5,11 +5,11 @@ namespace App\Filament\Provider\Resources;
 use App\Filament\Provider\Resources\BookingResource\Pages;
 use App\Models\Booking;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 
 class BookingResource extends Resource
 {
@@ -39,20 +39,22 @@ class BookingResource extends Resource
                 Tables\Columns\TextColumn::make('status')
                     ->label('Statut')
                     ->badge()
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'pending_provider_response' => 'Réponse du prestataire en attente',
+                        'pending' => 'En attente',
+                        'confirmed' => 'Confirmée',
+                        'completed' => 'Terminée',
+                        'rejected' => 'Refusée',
+                        'cancelled' => 'Annulée',
+                        default => ucfirst($state),
+                    })
                     ->color(fn (string $state): string => match ($state) {
+                        'pending_provider_response' => 'warning',
                         'pending' => 'warning',
                         'confirmed' => 'success',
                         'completed' => 'info',
+                        'rejected' => 'danger',
                         'cancelled' => 'danger',
-                        default => 'gray',
-                    }),
-                Tables\Columns\TextColumn::make('payment_status')
-                    ->label('Paiement')
-                    ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'paid' => 'success',
-                        'pending' => 'warning',
-                        'failed' => 'danger',
                         default => 'gray',
                     }),
                 Tables\Columns\TextColumn::make('event_details')
@@ -63,14 +65,59 @@ class BookingResource extends Resource
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
                     ->options([
+                        'pending_provider_response' => 'En attente de réponse',
                         'pending' => 'En attente',
-                        'confirmed' => 'Confirmé',
-                        'completed' => 'Terminé',
-                        'cancelled' => 'Annulé',
+                        'confirmed' => 'Confirmée',
+                        'completed' => 'Terminée',
+                        'rejected' => 'Refusée',
+                        'cancelled' => 'Annulée',
                     ]),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
+                Tables\Actions\Action::make('accept')
+                    ->label('Accepter')
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->modalHeading('Accepter la réservation')
+                    ->modalDescription('Êtes-vous sûr de vouloir accepter cette réservation ?')
+                    ->visible(fn (Booking $record): bool => $record->status === 'pending_provider_response')
+                    ->action(function (Booking $record) {
+                        $record->update([
+                            'status' => 'confirmed',
+                            'provider_response_at' => now(),
+                        ]);
+                        $client = $record->user;
+                        if ($client) {
+                            $client->notify(new \App\Notifications\ClientBookingAcceptedNotification($record));
+                        }
+                    })
+                    ->successNotificationTitle('Réservation acceptée'),
+                Tables\Actions\Action::make('reject')
+                    ->label('Refuser')
+                    ->icon('heroicon-o-x-circle')
+                    ->color('danger')
+                    ->form([
+                        Forms\Components\Textarea::make('rejection_reason')
+                            ->label('Raison du refus (facultatif)')
+                            ->placeholder('Expliquez brièvement pourquoi vous refusez cette réservation...')
+                            ->maxLength(500)
+                            ->rows(4),
+                    ])
+                    ->visible(fn (Booking $record): bool => $record->status === 'pending_provider_response')
+                    ->action(function (Booking $record, array $data) {
+                        $record->update([
+                            'status' => 'rejected',
+                            'rejection_reason' => $data['rejection_reason'] ?? null,
+                            'provider_response_at' => now(),
+                        ]);
+                        $client = $record->user;
+                        if ($client) {
+                            $client->notify(new \App\Notifications\ClientBookingRejectedNotification($record));
+                        }
+                    })
+                    ->successNotificationTitle('Réservation refusée'),
                 Tables\Actions\Action::make('mark_done')
                     ->label('Marquer comme fait')
                     ->icon('heroicon-o-check-badge')
@@ -92,14 +139,14 @@ class BookingResource extends Resource
                     ->icon('heroicon-o-x-circle')
                     ->color('danger')
                     ->requiresConfirmation()
-                    ->visible(fn (Booking $record): bool => $record->status === 'pending')
+                    ->visible(fn (Booking $record): bool => in_array($record->status, ['pending', 'confirmed']))
                     ->action(fn (Booking $record) => $record->update(['status' => 'cancelled'])),
             ]);
     }
 
     public static function getEloquentQuery(): Builder
     {
-        $provider = auth()->user()->provider;
+        $provider = Auth::user()?->provider;
 
         if (!$provider) {
             return parent::getEloquentQuery()->whereRaw('1 = 0');

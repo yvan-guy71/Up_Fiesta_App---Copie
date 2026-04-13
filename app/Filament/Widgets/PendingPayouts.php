@@ -15,6 +15,11 @@ use Filament\Notifications\Notification as FilamentNotification;
 
 class PendingPayouts extends BaseWidget
 {
+    public static function canView(): bool
+    {
+        return false;
+    }
+
     protected static ?int $sort = 3;
 
     protected int | string | array $columnSpan = 'full';

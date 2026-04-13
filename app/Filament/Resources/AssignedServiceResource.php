@@ -38,23 +38,100 @@ class AssignedServiceResource extends Resource
                             ->relationship(
                                 'serviceRequest',
                                 'subject',
-                                fn (Builder $query) => $query->whereDoesntHave('assignedServices', function ($q) {
-                                    $q->where('status', 'accepted');
-                                })
+                                fn (Builder $query) => $query->latest()
+                                    ->whereDoesntHave('assignedServices', function ($q) {
+                                        $q->where('status', 'accepted');
+                                    })
                             )
                             ->searchable()
                             ->preload()
                             ->required()
                             ->reactive()
                             ->afterStateUpdated(fn (Forms\Set $set) => $set('provider_id', null))
-                            ->getOptionLabelFromRecordUsing(fn (ServiceRequest $record) => $record->subject . ' - Budget: ' . number_format($record->budget, 0) . ' XOF'),
+                            ->getOptionLabelFromRecordUsing(fn (ServiceRequest $record) => "{$record->subject} [{$record->kind}] - {$record->event_date->format('d/m/Y')} - Budget: " . number_format($record->budget, 0) . " XOF")
+                            ->createOptionForm([
+                                Forms\Components\Select::make('user_id')
+                                    ->relationship('user', 'name', fn ($query) => $query->where('role', 'client'))
+                                    ->required()
+                                    ->label('Client'),
+                                Forms\Components\Select::make('type')
+                                    ->options(['service' => 'Service', 'event' => 'Événement'])
+                                    ->required()
+                                    ->default('service'),
+                                Forms\Components\Select::make('kind')
+                                    ->options(['prestations' => 'Prestations (Événementiel)'])
+                                    ->required()
+                                    ->default('prestations')
+                                    ->disabled(),
+                                Forms\Components\TextInput::make('subject')
+                                    ->required()
+                                    ->maxLength(255),
+                                Forms\Components\Textarea::make('description')
+                                    ->required(),
+                                Forms\Components\DateTimePicker::make('event_date')
+                                    ->required(),
+                                Forms\Components\TextInput::make('location')
+                                    ->required(),
+                                Forms\Components\TextInput::make('budget')
+                                    ->numeric()
+                                    ->prefix('XOF')
+                                    ->required(),
+                            ])
+                            ->columnSpan(1),
+
+                        Forms\Components\TextInput::make('min_experience')
+                            ->label('Expérience min. (ans)')
+                            ->numeric()
+                            ->default(0)
+                            ->reactive()
+                            ->afterStateUpdated(fn (Forms\Set $set) => $set('provider_id', null))
+                            ->suffix('ans d\'exp.')
+                            ->columnSpan(1),
                         
                         Forms\Components\Select::make('provider_id')
                             ->label('Prestataire à assigner')
-                            ->relationship('provider', 'name')
+                            ->relationship(
+                                'provider',
+                                'name',
+                                function (Builder $query, Forms\Get $get) {
+                                    $requestId = $get('service_request_id');
+                                    $minExp = $get('min_experience') ?? 0;
+
+                                    if (!$requestId) {
+                                        return $query->whereRaw('1 = 0');
+                                    }
+
+                                    $request = ServiceRequest::find($requestId);
+                                    if (!$request) {
+                                        return $query->whereRaw('1 = 0');
+                                    }
+
+                                    // Filter providers by the 'kind' of the request
+                                    $query->where(function($q) use ($request) {
+                                        $q->whereHas('category', function ($sq) use ($request) {
+                                            $sq->where('kind', $request->kind);
+                                        })->orWhereHas('categories', function ($sq) use ($request) {
+                                            $sq->where('kind', $request->kind);
+                                        });
+                                    });
+
+                                    // Filter by years of experience
+                                    if ($minExp > 0) {
+                                        $query->where('years_of_experience', '>=', $minExp);
+                                    }
+
+                                    // Prioritize verified providers and more experienced ones
+                                    return $query->orderByDesc('is_verified')
+                                        ->orderByDesc('years_of_experience');
+                                }
+                            )
                             ->searchable()
                             ->preload()
-                            ->required(),
+                            ->required()
+                            ->columnSpanFull()
+                            ->loadingMessage('Recherche des prestataires qualifiés...')
+                            ->noSearchResultsMessage('Aucun prestataire correspondant trouvé avec ces critères.')
+                            ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->name} (" . ($record->category?->name ?? 'Sans catégorie') . ") - Exp: {$record->years_of_experience} ans - " . ($record->is_verified ? '✅ Vérifié' : '⏳ Non vérifié')),
                     ])->columns(2),
 
                 Forms\Components\Section::make('Statut')
@@ -170,18 +247,42 @@ class AssignedServiceResource extends Resource
                         'completed' => 'Complété',
                     ])
                     ->indicator('Statut'),
-                
                 Tables\Filters\SelectFilter::make('serviceRequest.kind')
                     ->label('Type de service')
                     ->relationship('serviceRequest', 'kind')
                     ->indicator('Type'),
-                
+                Tables\Filters\SelectFilter::make('provider_id')
+                    ->label('Prestataire')
+                    ->relationship('provider', 'name')
+                    ->searchable(),
+                Tables\Filters\SelectFilter::make('serviceRequest.user_id')
+                    ->label('Client')
+                    ->relationship('serviceRequest.user', 'name')
+                    ->searchable(),
+                Tables\Filters\Filter::make('serviceRequest.budget')
+                    ->form([
+                        Forms\Components\TextInput::make('min')->label('Budget min')->numeric(),
+                        Forms\Components\TextInput::make('max')->label('Budget max')->numeric(),
+                    ])
+                    ->query(function ($query, $data) {
+                        return $query
+                            ->when($data['min'], fn ($q, $min) => $q->whereHas('serviceRequest', fn ($sq) => $sq->where('budget', '>=', $min)))
+                            ->when($data['max'], fn ($q, $max) => $q->whereHas('serviceRequest', fn ($sq) => $sq->where('budget', '<=', $max)));
+                    }),
+                Tables\Filters\Filter::make('serviceRequest.event_date')
+                    ->form([
+                        Forms\Components\DatePicker::make('from')->label('Événement du'),
+                        Forms\Components\DatePicker::make('to')->label('Événement jusqu\'au'),
+                    ])
+                    ->query(function ($query, $data) {
+                        return $query
+                            ->when($data['from'], fn ($q, $date) => $q->whereHas('serviceRequest', fn ($sq) => $sq->whereDate('event_date', '>=', $date)))
+                            ->when($data['to'], fn ($q, $date) => $q->whereHas('serviceRequest', fn ($sq) => $sq->whereDate('event_date', '<=', $date)));
+                    }),
                 Tables\Filters\Filter::make('assigned_at')
                     ->form([
-                        Forms\Components\DatePicker::make('assigned_from')
-                            ->label('Assigné du'),
-                        Forms\Components\DatePicker::make('assigned_until')
-                            ->label('Assigné jusqu\'au'),
+                        Forms\Components\DatePicker::make('assigned_from')->label('Assigné du'),
+                        Forms\Components\DatePicker::make('assigned_until')->label('Assigné jusqu\'au'),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query

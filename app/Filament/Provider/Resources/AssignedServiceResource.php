@@ -119,6 +119,12 @@ class AssignedServiceResource extends Resource
                     ->dateTime('d/m/Y H:i')
                     ->sortable(),
 
+                Tables\Columns\BadgeColumn::make('viewed_at')
+                    ->label('Nouveau')
+                    ->color('info')
+                    ->formatStateUsing(fn ($state) => is_null($state) ? 'Nouveau' : null)
+                    ->visible(fn ($record) => is_null($record?->viewed_at)),
+
                 Tables\Columns\BadgeColumn::make('status')
                     ->label('Votre réponse')
                     ->colors([
@@ -183,7 +189,12 @@ class AssignedServiceResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make()
                     ->icon('heroicon-m-eye')
-                    ->label('Voir'),
+                    ->label('Voir')
+                    ->after(function (AssignedService $record) {
+                        if (is_null($record->viewed_at)) {
+                            $record->update(['viewed_at' => now()]);
+                        }
+                    }),
 
                 Tables\Actions\Action::make('accept')
                     ->label('Accepter')
@@ -216,7 +227,7 @@ class AssignedServiceResource extends Resource
                     ->color('info')
                     ->requiresConfirmation()
                     ->modalHeading('Marquer le service comme complété?')
-                    ->modalDescription('Cette action ne peut pas être annulée.')
+                    ->modalDescription('Cette action ne peut pas être annulée. Confirmez que le service a été réalisé avec succès.')
                     ->modalSubmitActionLabel('Oui, complété')
                     ->visible(fn (AssignedService $record) => $record->isAccepted())
                     ->action(fn (AssignedService $record) => static::completeAssignment($record)),

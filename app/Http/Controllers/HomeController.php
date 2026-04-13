@@ -13,9 +13,9 @@ class HomeController extends Controller
 {
     public function index(Request $request)
     {
-        // Toutes les catégories pour la zone de recherche (non filtrées par nombre de prestataires)
-        $searchCategories = \Illuminate\Support\Facades\Cache::remember('all_categories_search', 3600, function() {
-            return ServiceCategory::orderBy('name')->get();
+        // Only event services (prestations) are supported - filter categories
+        $searchCategories = \Illuminate\Support\Facades\Cache::remember('all_categories_search_v2', 3600, function() {
+            return ServiceCategory::where('kind', ServiceCategory::KIND_PRESTATIONS)->orderBy('name')->get();
         });
 
         // 5 catégories avec prestataires pour la section "Parcourir" de la home
@@ -25,19 +25,14 @@ class HomeController extends Controller
             })->take(5);
         });
 
-        // apply kind filter if requested for the home categories (section "Parcourir")
-        if ($request->filled('kind')) {
-            $kind = $request->kind;
-            if (in_array($kind, [ServiceCategory::KIND_PRESTATIONS, ServiceCategory::KIND_DOMESTIQUES], true)) {
-                $homeCategories = ServiceCategory::withCount('providers')
-                    ->where('kind', $kind)
-                    ->get()
-                    ->filter(function($category) {
-                        return $category->providers_count > 0;
-                    })
-                    ->take(5);
-            }
-        }
+        // Only prestations (event services) are now supported
+        $homeCategories = ServiceCategory::withCount('providers')
+            ->where('kind', ServiceCategory::KIND_PRESTATIONS)
+            ->get()
+            ->filter(function($category) {
+                return $category->providers_count > 0;
+            })
+            ->take(5);
 
         // if a specific category was clicked, only keep that one for the section "Parcourir"
         if ($request->filled('category')) {
@@ -65,8 +60,8 @@ class HomeController extends Controller
     public function search(Request $request)
     {
         try {
-            // Get categories and cities without heavy caching
-            $searchCategories = ServiceCategory::orderBy('name')->get();
+            // Get only event services (prestations) categories
+            $searchCategories = ServiceCategory::where('kind', ServiceCategory::KIND_PRESTATIONS)->orderBy('name')->get();
             $cities = City::all();
             
             // Start with base query
@@ -81,15 +76,10 @@ class HomeController extends Controller
                 });
             }
 
-            // Filter by kind
-            if ($request->filled('kind')) {
-                $kind = $request->kind;
-                if (in_array($kind, ['prestations', 'domestiques'], true)) {
-                    $query->whereHas('category', function ($sq) use ($kind) {
-                        $sq->where('kind', '=', $kind);
-                    });
-                }
-            }
+            // Only prestations (event services) are supported
+            $query->whereHas('category', function ($sq) {
+                $sq->where('kind', '=', 'prestations');
+            });
 
             // Filter by category
             if ($request->filled('category')) {
@@ -134,7 +124,7 @@ class HomeController extends Controller
             
             return view('search', [
                 'providers' => collect(),
-                'searchCategories' => ServiceCategory::orderBy('name')->get() ?? collect(),
+                'searchCategories' => ServiceCategory::where('kind', ServiceCategory::KIND_PRESTATIONS)->orderBy('name')->get() ?? collect(),
                 'cities' => City::all() ?? collect(),
                 'totalResults' => 0,
                 'selectedCategory' => null,

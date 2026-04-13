@@ -21,8 +21,8 @@ class MailTestController extends Controller
             $from = config('mail.from.address');
             $mailer = config('mail.default');
 
-            Mail::raw("Test d'envoi d'email depuis Up Fiesta.\nMailer: {$mailer}\nFrom: {$from}", function ($message) use ($to) {
-                $message->to($to)->subject('Test email Up Fiesta');
+            Mail::raw("Test d'envoi d'email depuis Upfiesta.\nMailer: {$mailer}\nFrom: {$from}", function ($message) use ($to) {
+                $message->to($to)->subject('Test email Upfiesta');
             });
 
             return back()->with('success', "Email de test envoyé à {$to} via le mailer '{$mailer}'.");
@@ -32,3 +32,6 @@ class MailTestController extends Controller
         }
     }
 }
+
+
+

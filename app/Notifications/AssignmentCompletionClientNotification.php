@@ -27,7 +27,7 @@ class AssignmentCompletionClientNotification extends Notification implements Sho
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', 'mail'];
     }
 
     /**
@@ -37,6 +37,8 @@ class AssignmentCompletionClientNotification extends Notification implements Sho
     {
         $serviceRequest = $this->assignedService->serviceRequest;
         $provider = $this->assignedService->provider;
+        $booking = \App\Models\Booking::where('assigned_service_id', $this->assignedService->id)->first();
+        $targetId = $booking ? $booking->id : $this->assignedService->id;
 
         return (new MailMessage)
             ->greeting('Bonjour ' . $notifiable->name . ',')
@@ -44,9 +46,9 @@ class AssignmentCompletionClientNotification extends Notification implements Sho
             ->line('**Détails du service complété:**')
             ->line('Sujet: ' . $serviceRequest->subject)
             ->line('Prestataire: ' . $provider->name)
-            ->line('Merci de laisser un avis sur la qualité du service reçu.')
-            ->action('Laisser un avis', route('bookings.show', $this->assignedService->id))
-            ->line('Votre avis aide les autres clients à trouver les meilleurs prestataires.');
+            ->line('**Action requise:** Veuillez laisser une note et un commentaire sur la prestation.')
+            ->action('Noter le service', url('/mes-reservations/' . $targetId))
+            ->line('Votre avis est essentiel pour valider le travail et permettre d\'assurer la qualité du prestataire.');
     }
 
     /**
@@ -56,12 +58,17 @@ class AssignmentCompletionClientNotification extends Notification implements Sho
      */
     public function toArray(object $notifiable): array
     {
+        $booking = \App\Models\Booking::where('assigned_service_id', $this->assignedService->id)->first();
+        $targetId = $booking ? $booking->id : $this->assignedService->id;
+
         return [
             'assigned_service_id' => $this->assignedService->id,
+            'booking_id' => $booking?->id,
             'service_request_id' => $this->assignedService->service_request_id,
             'provider_id' => $this->assignedService->provider_id,
-            'message' => 'Votre service "' . $this->assignedService->serviceRequest->subject . '" a été complété par ' . $this->assignedService->provider->name . '.',
-            'action_url' => '/mes-reservations/' . $this->assignedService->id,
+            'message' => 'Le service "' . $this->assignedService->serviceRequest->subject . '" est terminé. Merci de laisser votre avis pour valider le travail.',
+            'action_url' => '/mes-reservations/' . $targetId,
+            'require_review' => true,
         ];
     }
 }

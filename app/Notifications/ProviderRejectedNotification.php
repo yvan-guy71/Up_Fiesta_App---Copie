@@ -28,7 +28,7 @@ class ProviderRejectedNotification extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', 'mail'];
     }
 
     /**
@@ -47,7 +47,7 @@ class ProviderRejectedNotification extends Notification implements ShouldQueue
         }
 
         $message->line(__('notifications.provider_fix_info_message'))
-            ->action(__('notifications.update_profile'), route('provider.update-profile'))
+            ->action(__('notifications.update_profile'), url('/prestataire/login'))
             ->line(__('notifications.contact_support', ['email' => config('mail.from.address')]));
 
         return $message;
@@ -62,7 +62,7 @@ class ProviderRejectedNotification extends Notification implements ShouldQueue
     {
         return [
             'message' => __('notifications.provider_rejected_message'),
-            'action_url' => route('provider.update-profile'),
+            'action_url' => '/prestataire/login',
             'rejection_reason' => $this->rejectionReason,
         ];
     }

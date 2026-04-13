@@ -5,9 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\Provider;
 use App\Models\Booking;
 use App\Models\AssignedService;
+use App\Models\User;
+use App\Notifications\AdminNewBookingNotification;
+use App\Notifications\ProviderNewBookingNotification;
 use App\Services\SmsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
 
 class BookingController extends Controller
 {
@@ -26,17 +30,29 @@ class BookingController extends Controller
             'event_date' => $request->event_date,
             'event_details' => $request->event_details,
             'total_price' => $provider->base_price ?? 0,
-            'status' => 'pending',
+            'status' => 'pending_provider_response',
         ]);
 
-        // Notification SMS
+        // Notifier le prestataire
+        $providerUser = $provider->user;
+        if ($providerUser) {
+            $providerUser->notify(new ProviderNewBookingNotification($booking));
+        }
+
+        // Notifier les admins
+        $admins = User::where('role', 'admin')->get();
+        if ($admins->isNotEmpty()) {
+            Notification::send($admins, new AdminNewBookingNotification($booking));
+        }
+
+        // Notification SMS au prestataire
         try {
             SmsService::notifyNewBooking($booking);
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error("Erreur SMS: " . $e->getMessage());
         }
 
-        return back()->with('success', "Up-Fiesta se charge de tout, nous contactons les prestataires pour vous.");
+        return back()->with('success', "Votre demande a été envoyée au prestataire!");
     }
 
     public function createFromAssignedService($assignedServiceId)
@@ -63,7 +79,7 @@ class BookingController extends Controller
             'event_details' => $assignedService->serviceRequest->description,
             'total_price' => $assignedService->serviceRequest->budget ?? $assignedService->provider->base_price ?? 0,
             'status' => 'confirmed',
-            'payment_status' => 'unpaid',
+            'payment_status' => 'paid', // Mark as paid to bypass payment flow
         ]);
 
         // Notification SMS
@@ -74,7 +90,7 @@ class BookingController extends Controller
         }
 
         return redirect()->route('bookings.show', $booking->id)
-            ->with('success', 'Réservation créée! Procédez au paiement pour finaliser.');
+            ->with('success', 'Réservation confirmée! Vous pouvez maintenant échanger directement avec le prestataire.');
     }
 
     public function index()
@@ -82,27 +98,41 @@ class BookingController extends Controller
         $page = request('page', 1);
         $perPage = 10;
         
+        // Load all bookings with provider relation eagerly
         $bookings = Booking::where('user_id', Auth::id())
-            ->with(['provider', 'review'])
+            ->with(['provider.category', 'review'])
             ->latest()
             ->get();
         
         // Also load assigned services that are accepted (but not yet booked)
-        $assignedServices = AssignedService::whereHas('serviceRequest', function ($query) {
-            $query->where('user_id', Auth::id());
-        })
-            ->where('status', 'accepted')
-            ->doesntHave('bookings') // Use doesntHave instead of whereDoesntHave
-            ->with(['provider', 'serviceRequest'])
-            ->latest()
-            ->get();
+        $assignedServices = AssignedService::query()
+            ->join('service_requests', 'service_requests.id', '=', 'assigned_services.service_request_id')
+            ->where('service_requests.user_id', Auth::id())
+            ->where('assigned_services.status', 'accepted')
+            ->whereNotIn('assigned_services.id', function ($query) {
+                $query->select('assigned_service_id')
+                    ->from('bookings')
+                    ->whereNotNull('assigned_service_id');
+            })
+            ->select('assigned_services.*')
+            ->with(['provider.category', 'serviceRequest'])
+            ->latest('assigned_services.created_at')
+            ->get()
+            ->map(function ($assignedService) {
+                // Ensure we can check the relation on assigned service
+                $assignedService->load('provider.category', 'serviceRequest');
+                return $assignedService;
+            });
         
         // Merge them together and sort by date
         $allItems = collect()
             ->merge($bookings)
             ->merge($assignedServices)
             ->sortByDesc(function ($item) {
-                return $item->created_at;
+                if ($item instanceof Booking) {
+                    return $item->created_at ?? now();
+                }
+                return $item->created_at ?? now();
             })
             ->values();
         
@@ -159,4 +189,75 @@ class BookingController extends Controller
         // Not found
         abort(404);
     }
+
+    /**
+     * Prestataire accepte une réservation (Web)
+     */
+    public function acceptBooking(Request $request, Booking $booking)
+    {
+        // Vérification que le prestataire qui accepte est bien le propriétaire de la reservation
+        $user = Auth::user();
+        if ($booking->provider->user_id !== $user->id) {
+            abort(403);
+        }
+
+        // La reservation ne doit pas avoir déjà reçu une réponse
+        if ($booking->status !== 'pending_provider_response') {
+            return back()->with('error', 'Cette réservation a déjà reçu une réponse.');
+        }
+
+        // Marquer la réservation comme acceptée
+        $booking->update([
+            'status' => 'confirmed',
+            'provider_response_at' => now(),
+        ]);
+
+        // Notifier le client que le prestataire a accepté
+        $client = $booking->user;
+        if ($client) {
+            $client->notify(new \App\Notifications\ClientBookingAcceptedNotification($booking));
+        }
+
+        return back()->with('success', 'Réservation acceptée! Le client a été notifié et peut vous contacter.');
+    }
+
+    /**
+     * Prestataire refuse une réservation (Web)
+     */
+    public function rejectBooking(Request $request, Booking $booking)
+    {
+        $request->validate([
+            'rejection_reason' => 'required|string|max:500',
+        ]);
+
+        // Vérification que le prestataire qui refuse est bien le propriétaire de la reservation
+        $user = Auth::user();
+        if ($booking->provider->user_id !== $user->id) {
+            abort(403);
+        }
+
+        // La reservation ne doit pas avoir déjà reçu une réponse
+        if ($booking->status !== 'pending_provider_response') {
+            return back()->with('error', 'Cette réservation a déjà reçu une réponse.');
+        }
+
+        // Marquer la réservation comme refusée
+        $booking->update([
+            'status' => 'rejected',
+            'rejection_reason' => $request->input('rejection_reason'),
+            'provider_response_at' => now(),
+        ]);
+
+        // Notifier le client que le prestataire a refusé
+        $client = $booking->user;
+        if ($client) {
+            $client->notify(new \App\Notifications\ClientBookingRejectedNotification($booking));
+        }
+
+        return back()->with('success', 'Réservation refusée. Le client a été notifié.');
+    }
+
 }
+
+
+

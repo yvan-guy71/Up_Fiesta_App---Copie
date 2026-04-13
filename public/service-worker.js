@@ -1,4 +1,4 @@
-const CACHE_NAME = 'up-fiesta-v1';
+const CACHE_NAME = 'Upfiesta-v1';
 const ASSETS = [
   '/',
   '/manifest.json',
@@ -20,3 +20,6 @@ self.addEventListener('fetch', event => {
     })
   );
 });
+
+
+

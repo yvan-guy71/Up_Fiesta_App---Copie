@@ -44,10 +44,10 @@ class ServiceCategoryResource extends Resource
                             ->label('Type')
                             ->options([
                                 ServiceCategory::KIND_PRESTATIONS => 'Prestations',
-                                ServiceCategory::KIND_DOMESTIQUES => 'Domestiques',
                             ])
                             ->required()
-                            ->default(ServiceCategory::KIND_PRESTATIONS),
+                            ->default(ServiceCategory::KIND_PRESTATIONS)
+                            ->disabled(),
                     ])->columns(2)
             ]);
     }
@@ -62,11 +62,7 @@ class ServiceCategoryResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('kind')
                     ->label('Type')
-                    ->formatStateUsing(fn ($state) => match ($state) {
-                        ServiceCategory::KIND_PRESTATIONS => 'Prestations',
-                        ServiceCategory::KIND_DOMESTIQUES => 'Domestiques',
-                        default => $state,
-                    })
+                    ->formatStateUsing(fn ($state) => 'Prestations (Événementiel)')
                     ->sortable()
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('providers_count')
@@ -77,14 +73,6 @@ class ServiceCategoryResource extends Resource
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-            ])
-            ->filters([
-                Tables\Filters\SelectFilter::make('kind')
-                    ->label('Type')
-                    ->options([
-                        ServiceCategory::KIND_PRESTATIONS => 'Prestations',
-                        ServiceCategory::KIND_DOMESTIQUES => 'Domestiques',
-                    ]),
             ])
             ->filters([
                 //

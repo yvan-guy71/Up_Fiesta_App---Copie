@@ -14,7 +14,7 @@ class ProviderApprovedNotification extends Notification implements ShouldQueue
     /**
      * Create a new notification instance.
      */
-    public function __construct()
+    public function __construct(public \App\Models\Provider $provider)
     {
     }
 
@@ -25,7 +25,7 @@ class ProviderApprovedNotification extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', 'mail'];
     }
 
     /**
@@ -38,7 +38,7 @@ class ProviderApprovedNotification extends Notification implements ShouldQueue
             ->greeting(__('notifications.provider_approved_greeting', ['name' => $notifiable->name]))
             ->line(__('notifications.provider_approved_message'))
             ->line(__('notifications.provider_can_accept_requests'))
-            ->action(__('notifications.view_profile'), route('provider.dashboard'))
+            ->action(__('notifications.view_profile'), url('/prestataire'))
             ->line(__('notifications.thank_you'));
     }
 
@@ -51,7 +51,7 @@ class ProviderApprovedNotification extends Notification implements ShouldQueue
     {
         return [
             'message' => __('notifications.provider_approved_message'),
-            'action_url' => route('provider.dashboard'),
+            'action_url' => '/prestataire',
         ];
     }
 }

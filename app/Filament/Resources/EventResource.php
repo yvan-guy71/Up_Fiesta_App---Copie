@@ -64,7 +64,7 @@ class EventResource extends Resource
                             ->default('pending'),
                     ])->columns(2),
 
-                Forms\Components\Section::make('Coordination Up Fiesta')
+                Forms\Components\Section::make('Coordination Upfiesta')
                     ->schema([
                         Forms\Components\Select::make('providers')
                             ->label('Prestataires assignés')
@@ -152,3 +152,6 @@ class EventResource extends Resource
         ];
     }
 }
+
+
+

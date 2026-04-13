@@ -1,0 +1,58 @@
+name: up_fiesta_app
+description: "Application officielle pour Zaly - Votre partenaire événementiel."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  webview_flutter: ^4.10.0
+  url_launcher: ^6.3.1
+  google_fonts: ^6.2.1
+  provider: ^6.1.2
+  cached_network_image: ^3.4.1
+  http: ^1.2.2
+  intl: ^0.19.0
+  shared_preferences: ^2.3.5
+  google_sign_in: ^6.2.1
+  font_awesome_flutter: ^10.7.0
+  flutter_staggered_animations: ^1.0.0
+  sqflite: ^2.3.0
+  path: ^1.9.0
+  firebase_core: ^3.10.1
+  firebase_messaging: ^15.2.1
+  flutter_local_notifications: ^17.2.3
+  image_picker: ^1.1.0
+  shimmer: ^3.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.4.0
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/logo.png"
+  min_sdk_android: 21
+
+flutter_native_splash:
+  color: "#ffffff"
+  image: assets/images/logo.png
+  android: true
+  ios: true
+  fullscreen: true
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/logo.png
+
+

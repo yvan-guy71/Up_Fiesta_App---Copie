@@ -1,0 +1,700 @@
+/* Styles spécifiques pour les prestataires */
+
+/* Conteneur principal */
+.provider-dashboard {
+    @apply bg-gray-50 min-h-screen;
+}
+
+/* En-tête du tableau de bord */
+.provider-header {
+    @apply bg-white shadow-sm border-b border-gray-200;
+}
+
+.provider-header-content {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4;
+}
+
+.provider-title {
+    @apply text-2xl font-bold text-gray-900;
+}
+
+.provider-subtitle {
+    @apply text-sm text-gray-600 mt-1;
+}
+
+/* Statut du compte */
+.account-status {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
+}
+
+.account-status.pending {
+    @apply bg-yellow-100 text-yellow-800;
+}
+
+.account-status.approved {
+    @apply bg-green-100 text-green-800;
+}
+
+.account-status.rejected {
+    @apply bg-red-100 text-red-800;
+}
+
+.account-status.verified {
+    @apply bg-blue-100 text-blue-800;
+}
+
+/* Statistiques */
+.stats-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8;
+}
+
+.stat-card {
+    @apply bg-white rounded-lg shadow-soft p-6 transition-transform hover:scale-105;
+}
+
+.stat-icon {
+    @apply w-12 h-12 rounded-lg flex items-center justify-center mb-4;
+}
+
+.stat-icon.primary {
+    @apply bg-primary-100 text-primary-600;
+}
+
+.stat-icon.warning {
+    @apply bg-warning-100 text-warning-600;
+}
+
+.stat-icon.success {
+    @apply bg-success-100 text-success-600;
+}
+
+.stat-icon.danger {
+    @apply bg-danger-100 text-danger-600;
+}
+
+.stat-value {
+    @apply text-2xl font-bold text-gray-900;
+}
+
+.stat-label {
+    @apply text-sm text-gray-600 mt-1;
+}
+
+.stat-change {
+    @apply text-xs mt-2 inline-flex items-center;
+}
+
+.stat-change.positive {
+    @apply text-success-600;
+}
+
+.stat-change.negative {
+    @apply text-danger-600;
+}
+
+/* Cartes d'assignation */
+.assignment-card {
+    @apply bg-white rounded-lg shadow-soft border border-gray-200 overflow-hidden transition-all hover:shadow-medium;
+}
+
+.assignment-header {
+    @apply p-6 border-b border-gray-200;
+}
+
+.assignment-title {
+    @apply text-lg font-semibold text-gray-900 mb-2;
+}
+
+.assignment-client {
+    @apply text-sm text-gray-600 flex items-center;
+}
+
+.assignment-client-icon {
+    @apply w-4 h-4 mr-2 text-gray-400;
+}
+
+.assignment-body {
+    @apply p-6;
+}
+
+.assignment-details {
+    @apply space-y-3;
+}
+
+.assignment-detail {
+    @apply flex items-center text-sm;
+}
+
+.assignment-detail-label {
+    @apply font-medium text-gray-700 w-24;
+}
+
+.assignment-detail-value {
+    @apply text-gray-900;
+}
+
+.assignment-budget {
+    @apply text-lg font-bold text-primary-600;
+}
+
+.assignment-footer {
+    @apply p-6 bg-gray-50 border-t border-gray-200 flex justify-between items-center;
+}
+
+.assignment-status {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
+}
+
+.assignment-status.pending {
+    @apply bg-warning-100 text-warning-800;
+}
+
+.assignment-status.accepted {
+    @apply bg-success-100 text-success-800;
+}
+
+.assignment-status.rejected {
+    @apply bg-danger-100 text-danger-800;
+}
+
+.assignment-status.completed {
+    @apply bg-info-100 text-info-800;
+}
+
+.assignment-actions {
+    @apply flex gap-2;
+}
+
+.btn-assignment {
+    @apply px-4 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2;
+}
+
+.btn-accept {
+    @apply bg-success-600 text-white hover:bg-success-700 focus:ring-success-500;
+}
+
+.btn-reject {
+    @apply bg-danger-600 text-white hover:bg-danger-700 focus:ring-danger-500;
+}
+
+.btn-complete {
+    @apply bg-info-600 text-white hover:bg-info-700 focus:ring-info-500;
+}
+
+.btn-view {
+    @apply bg-gray-600 text-white hover:bg-gray-700 focus:ring-gray-500;
+}
+
+/* Cartes de réservation */
+.booking-card {
+    @apply bg-white rounded-lg shadow-soft border border-gray-200 overflow-hidden transition-all hover:shadow-medium;
+}
+
+.booking-header {
+    @apply p-6 border-b border-gray-200;
+}
+
+.booking-title {
+    @apply text-lg font-semibold text-gray-900 mb-2;
+}
+
+.booking-client {
+    @apply text-sm text-gray-600 flex items-center;
+}
+
+.booking-body {
+    @apply p-6;
+}
+
+.booking-details {
+    @apply space-y-3;
+}
+
+.booking-detail {
+    @apply flex items-center text-sm;
+}
+
+.booking-detail-label {
+    @apply font-medium text-gray-700 w-32;
+}
+
+.booking-detail-value {
+    @apply text-gray-900;
+}
+
+.booking-date {
+    @apply flex items-center text-primary-600;
+}
+
+.booking-price {
+    @apply text-lg font-bold text-success-600;
+}
+
+.booking-status {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
+}
+
+.booking-status.pending {
+    @apply bg-warning-100 text-warning-800;
+}
+
+.booking-status.confirmed {
+    @apply bg-success-100 text-success-800;
+}
+
+.booking-status.completed {
+    @apply bg-info-100 text-info-800;
+}
+
+.booking-status.cancelled {
+    @apply bg-danger-100 text-danger-800;
+}
+
+/* Galerie média */
+.media-gallery {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6;
+}
+
+.media-item {
+    @apply relative group bg-white rounded-lg shadow-soft overflow-hidden transition-all hover:shadow-medium;
+}
+
+.media-item img {
+    @apply w-full h-48 object-cover;
+}
+
+.media-placeholder {
+    @apply w-full h-48 bg-gray-200 flex items-center justify-center;
+}
+
+.media-overlay {
+    @apply absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2;
+}
+
+.media-overlay button {
+    @apply p-2 bg-white rounded-full text-gray-700 hover:bg-gray-100 transition-colors;
+}
+
+/* Formulaire de profil */
+.provider-form {
+    @apply space-y-6;
+}
+
+.form-section {
+    @apply bg-white rounded-lg shadow-soft p-6;
+}
+
+.form-section-title {
+    @apply text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200;
+}
+
+.form-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-6;
+}
+
+.form-group {
+    @apply space-y-2;
+}
+
+.form-label {
+    @apply block text-sm font-medium text-gray-700;
+}
+
+.form-input {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors;
+}
+
+.form-input:focus {
+    @apply outline-none;
+}
+
+.form-input:disabled {
+    @apply bg-gray-100 text-gray-500 cursor-not-allowed;
+}
+
+.form-textarea {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors resize-vertical;
+}
+
+.form-select {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors;
+}
+
+.form-file {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-sm file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100;
+}
+
+.form-error {
+    @apply text-sm text-danger-600 mt-1;
+}
+
+.form-help {
+    @apply text-sm text-gray-500 mt-1;
+}
+
+/* Boutons */
+.btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2;
+}
+
+.btn-primary {
+    @apply bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500;
+}
+
+.btn-secondary {
+    @apply bg-gray-600 text-white hover:bg-gray-700 focus:ring-gray-500;
+}
+
+.btn-success {
+    @apply bg-success-600 text-white hover:bg-success-700 focus:ring-success-500;
+}
+
+.btn-danger {
+    @apply bg-danger-600 text-white hover:bg-danger-700 focus:ring-danger-500;
+}
+
+.btn-outline {
+    @apply border border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-gray-500;
+}
+
+.btn-sm {
+    @apply px-3 py-1.5 text-sm;
+}
+
+.btn-lg {
+    @apply px-6 py-3 text-lg;
+}
+
+/* Dropdown des notifications */
+.notifications-dropdown {
+    @apply absolute right-0 mt-2 w-96 bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden z-50;
+    max-height: 48rem;
+    transform-origin: top right;
+    animation: dropdownIn 0.2s ease-out;
+}
+
+.notifications-header {
+    @apply px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between;
+}
+
+.notifications-title {
+    @apply font-semibold text-gray-900 dark:text-white;
+}
+
+.notifications-count {
+    @apply text-sm text-gray-500 dark:text-gray-400;
+}
+
+.mark-all-read {
+    @apply text-xs text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors;
+}
+
+.notifications-list {
+    @apply max-h-96 overflow-y-auto;
+}
+
+.notification-item {
+    @apply p-4 border-b border-gray-100 dark:border-gray-800 transition-all duration-200 cursor-pointer;
+    position: relative;
+}
+
+.notification-item:hover {
+    @apply bg-gray-50 dark:bg-gray-800;
+}
+
+.notification-item.unread {
+    @apply bg-blue-50 dark:bg-blue-900/20 border-l-4 border-l-primary-500 dark:border-l-primary-400;
+}
+
+.notification-item.unread::before {
+    content: '';
+    @apply absolute top-4 right-4 w-2 h-2 bg-primary-500 dark:bg-primary-400 rounded-full;
+}
+
+.notification-content {
+    @apply flex gap-3;
+}
+
+.notification-avatar {
+    @apply w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0;
+}
+
+.notification-avatar.info {
+    @apply bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400;
+}
+
+.notification-avatar.success {
+    @apply bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400;
+}
+
+.notification-avatar.warning {
+    @apply bg-yellow-100 dark:bg-yellow-900/50 text-yellow-600 dark:text-yellow-400;
+}
+
+.notification-avatar.error {
+    @apply bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400;
+}
+
+.notification-avatar.booking {
+    @apply bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400;
+}
+
+.notification-avatar.payment {
+    @apply bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400;
+}
+
+.notification-avatar.message {
+    @apply bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400;
+}
+
+.notification-avatar.assignment {
+    @apply bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-400;
+}
+
+.notification-avatar.review {
+    @apply bg-pink-100 dark:bg-pink-900/50 text-pink-600 dark:text-pink-400;
+}
+
+.notification-avatar.provider {
+    @apply bg-cyan-100 dark:bg-cyan-900/50 text-cyan-600 dark:text-cyan-400;
+}
+
+.notification-avatar.admin {
+    @apply bg-violet-100 dark:bg-violet-900/50 text-violet-600 dark:text-violet-400;
+}
+
+.notification-body {
+    @apply flex-1 min-w-0;
+}
+
+.notification-header-row {
+    @apply flex items-start justify-between mb-1;
+}
+
+.notification-title {
+    @apply font-medium text-gray-900 dark:text-white text-sm leading-tight;
+}
+
+.notification-time {
+    @apply text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 ml-2;
+}
+
+.notification-message {
+    @apply text-sm text-gray-600 dark:text-gray-300 line-clamp-2;
+}
+
+.notification-actions {
+    @apply flex gap-1 mt-2;
+}
+
+.notification-action {
+    @apply text-xs text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors;
+}
+
+.notifications-empty {
+    @apply p-8 text-center;
+}
+
+.notifications-empty-icon {
+    @apply w-12 h-12 mx-auto text-gray-400 dark:text-gray-600 mb-3;
+}
+
+.notifications-empty-title {
+    @apply font-medium text-gray-900 dark:text-white mb-1;
+}
+
+.notifications-empty-message {
+    @apply text-sm text-gray-500 dark:text-gray-400;
+}
+
+.notifications-footer {
+    @apply px-4 py-3 border-t border-gray-200 dark:border-gray-700;
+}
+
+.view-all-link {
+    @apply w-full text-center text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors font-medium;
+}
+
+/* Animation dropdown */
+@keyframes dropdownIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Bouton de notification */
+.notification-button {
+    @apply relative p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors;
+}
+
+.notification-button:hover {
+    @apply bg-gray-100 dark:bg-gray-800 rounded-lg;
+}
+
+.notification-badge {
+    @apply absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center;
+    animation: pulse 2s infinite;
+}
+
+/* Toast notifications améliorées */
+.toast-container {
+    @apply fixed top-4 right-4 z-50 space-y-3;
+}
+
+.toast {
+    @apply bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 p-4 min-w-80 max-w-md transform transition-all duration-300;
+    position: relative;
+}
+
+.toast::before {
+    content: '';
+    @apply absolute top-0 left-0 w-1 h-full rounded-l-xl;
+}
+
+.toast.info::before {
+    @apply bg-blue-500;
+}
+
+.toast.success::before {
+    @apply bg-green-500;
+}
+
+.toast.warning::before {
+    @apply bg-yellow-500;
+}
+
+.toast.error::before {
+    @apply bg-red-500;
+}
+
+.toast-content {
+    @apply flex items-start gap-3;
+}
+
+.toast-icon {
+    @apply w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0;
+}
+
+.toast.info .toast-icon {
+    @apply bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400;
+}
+
+.toast.success .toast-icon {
+    @apply bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400;
+}
+
+.toast.warning .toast-icon {
+    @apply bg-yellow-100 dark:bg-yellow-900/50 text-yellow-600 dark:text-yellow-400;
+}
+
+.toast.error .toast-icon {
+    @apply bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400;
+}
+
+.toast-text {
+    @apply flex-1;
+}
+
+.toast-text strong {
+    @apply block font-semibold text-gray-900 dark:text-white mb-1;
+}
+
+.toast-text p {
+    @apply text-sm text-gray-600 dark:text-gray-300;
+}
+
+.toast-close {
+    @apply p-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors rounded-lg;
+}
+
+.toast-close:hover {
+    @apply bg-gray-100 dark:bg-gray-800;
+}
+
+/* États de connexion */
+.connection-status {
+    @apply w-3 h-3 rounded-full;
+}
+
+.connection-status.connected {
+    @apply bg-success-500;
+}
+
+.connection-status.disconnected {
+    @apply bg-danger-500;
+}
+
+/* Indicateurs en ligne */
+.online-indicator {
+    @apply w-2 h-2 rounded-full;
+}
+
+.online-indicator.online {
+    @apply bg-success-500;
+}
+
+.online-indicator.offline {
+    @apply bg-gray-400;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(10px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+}
+
+.animate-pulse {
+    animation: pulse 2s infinite;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .stats-grid {
+        @apply grid-cols-1;
+    }
+    
+    .media-gallery {
+        @apply grid-cols-1;
+    }
+    
+    .form-grid {
+        @apply grid-cols-1;
+    }
+    
+    .assignment-footer,
+    .booking-footer {
+        @apply flex-col gap-3;
+    }
+    
+    .assignment-actions,
+    .booking-actions {
+        @apply w-full;
+    }
+    
+    .btn-assignment {
+        @apply flex-1;
+    }
+}

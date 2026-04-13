@@ -46,24 +46,16 @@
                     </div>
                 </div>
 
-                @if($booking->status === 'confirmed' && $booking->payment_status !== 'paid')
+                @if($booking->status === 'confirmed')
                     <div class="mt-8 p-6 bg-indigo-50 rounded-2xl border border-indigo-100">
-                        <h3 class="text-lg font-bold text-indigo-900 mb-4">Procéder au paiement</h3>
-                        <p class="text-sm text-indigo-700 mb-6">Votre réservation a été confirmée ! Vous pouvez maintenant choisir votre mode de paiement préféré pour finaliser la commande.</p>
+                        <h3 class="text-lg font-bold text-indigo-900 mb-4">Mise en relation</h3>
+                        <p class="text-sm text-indigo-700 mb-6">Votre réservation a été confirmée ! Vous pouvez maintenant entrer directement en contact avec le prestataire pour discuter des détails et commencer le service. Le paiement se fait directement entre vous et le prestataire.</p>
                         
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <a href="{{ route('payment.checkout', ['booking' => $booking->id, 'method' => 'tmoney']) }}" 
-                               class="flex items-center justify-center gap-3 px-6 py-4 bg-white border-2 border-indigo-200 rounded-xl hover:border-indigo-500 hover:bg-indigo-50 transition-all group">
-                                <img src="{{ asset('images/payments/tmoney.png') }}" alt="TMoney" class="h-8 w-auto">
-                                <span class="font-bold text-slate-700">TMoney</span>
-                            </a>
-                            <a href="{{ route('payment.checkout', ['booking' => $booking->id, 'method' => 'flooz']) }}" 
-                               class="flex items-center justify-center gap-3 px-6 py-4 bg-white border-2 border-indigo-200 rounded-xl hover:border-indigo-500 hover:bg-indigo-50 transition-all group">
-                                <img src="{{ asset('images/payments/flooz.png') }}" alt="Moov Money" class="h-8 w-auto">
-                                <span class="font-bold text-slate-700">Moov Money</span>
-                            </a>
+                        <div class="grid grid-cols-1 gap-4">
+                            <div class="flex items-center justify-center gap-3 px-6 py-4 bg-white border-2 border-indigo-200 rounded-xl">
+                                <span class="font-bold text-slate-700">Paiement direct au prestataire</span>
+                            </div>
                         </div>
-                        <p class="text-[10px] text-center text-indigo-400 mt-4 uppercase tracking-widest font-bold">Sécurisé par PayGate Togo</p>
                     </div>
                 @endif
             </div>

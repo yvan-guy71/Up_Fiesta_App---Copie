@@ -1,6 +1,6 @@
 {
-  "name": "Up Fiesta - Événementiel Togo",
-  "short_name": "Up Fiesta",
+  "name": "Upfiesta - Événementiel Togo",
+  "short_name": "Upfiesta",
   "description": "Plateforme moderne de gestion d'événements et de prestataires au Togo.",
   "start_url": "/",
   "display": "standalone",
@@ -8,14 +8,14 @@
   "theme_color": "#4f46e5",
   "icons": [
     {
-      "src": "public\images\logo.jfif",
+      "src": "public\images\logo.png",
       "sizes": "192x192",
-      "type": "image/jfif"
+      "type": "image/png"
     },
     {
-      "src": "public\images\logo.jfif",
+      "src": "public\images\logo.png",
       "sizes": "512x512",
-      "type": "image/jfif"
+      "type": "image/png"
     }
   ]
 }

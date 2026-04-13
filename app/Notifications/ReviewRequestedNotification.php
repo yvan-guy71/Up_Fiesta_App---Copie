@@ -27,10 +27,10 @@ class ReviewRequestedNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Veuillez noter votre prestataire - Up Fiesta')
+            ->subject('Veuillez noter votre prestataire - Upfiesta')
             ->line('Le prestataire ' . $this->booking->provider->name . ' a marqué le service comme terminé.')
             ->line('Pour que nos administrateurs vérifient la qualité du travail, veuillez noter le prestataire sur la plateforme.')
-            ->action('Noter le prestataire', url('/reviews/' . $this->booking->id))
+            ->action('Noter le prestataire', url('/mes-reservations/' . $this->booking->id))
             ->line('Votre évaluation nous aide à maintenir la qualité des services.')
             ->salutation('Cordialement,');
     }
@@ -42,6 +42,11 @@ class ReviewRequestedNotification extends Notification implements ShouldQueue
             'provider_id' => $this->booking->provider_id,
             'provider_name' => $this->booking->provider->name,
             'message' => 'Veuillez noter le prestataire ' . $this->booking->provider->name,
+            'action_url' => '/mes-reservations/' . $this->booking->id,
+            'require_review' => true,
         ];
     }
 }
+
+
+

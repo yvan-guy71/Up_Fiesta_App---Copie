@@ -47,7 +47,7 @@ class ServiceRequestAssignedToProviderNotification extends Notification implemen
             ->line('**Votre demande:**')
             ->line('Sujet: ' . $serviceRequest->subject)
             ->line('Date prévue: ' . $serviceRequest->event_date->format('d/m/Y H:i'))
-            ->line('Le prestataire a reçu votre demande et Up-fiesta vous contactera pour confirmer son acceptation.')
+            ->line('Le prestataire a reçu votre demande et Upfiesta vous contactera pour confirmer son acceptation.')
             ->line('Veuillez garder votre téléphone à proximité.');
     }
 
@@ -68,3 +68,6 @@ class ServiceRequestAssignedToProviderNotification extends Notification implemen
         ];
     }
 }
+
+
+

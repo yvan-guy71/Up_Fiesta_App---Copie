@@ -27,7 +27,6 @@ class PendingVerifications extends BaseWidget
             ->query(
                 Booking::query()
                     ->with(['user', 'provider', 'review'])
-                    ->where('payment_status', 'paid')
                     ->where('status', 'confirmed')
                     ->where('provider_done', true)
                     ->where('admin_verification_status', 'pending')
@@ -38,7 +37,6 @@ class PendingVerifications extends BaseWidget
                 Tables\Columns\TextColumn::make('user.name')->label('Client')->searchable(),
                 Tables\Columns\TextColumn::make('provider.name')->label('Prestataire')->searchable(),
                 Tables\Columns\TextColumn::make('total_price')->label('Total')->money('XOF')->sortable(),
-                Tables\Columns\TextColumn::make('provider_amount')->label('À verser')->money('XOF')->sortable(),
                 Tables\Columns\IconColumn::make('require_client_review')->label('Notation demandée')
                     ->boolean(),
                 Tables\Columns\IconColumn::make('review.id')->label('Noté')
@@ -92,15 +90,15 @@ class PendingVerifications extends BaseWidget
                     ->icon('heroicon-o-shield-check')
                     ->color('warning')
                     ->requiresConfirmation()
-                    ->modalHeading('Vérifier le travail')
-                    ->modalDescription('Cela appliquera une réduction de 15% au montant du prestataire.')
+                    ->modalHeading('Vérifier la qualité du service')
+                    ->modalDescription('Cette action valide la qualité du service rendu pour nos statistiques.')
                     ->action(function (Booking $record) {
                         $reviewService = app(BookingReviewService::class);
-                        $reviewService->verifyBookingByAdmin($record, auth()->id(), true);
+                        $reviewService->verifyBookingByAdmin($record, auth()->id());
                         
                         FilamentNotification::make()
                             ->title('Travail vérifié')
-                            ->body("La réservation #{$record->id} a été vérifiée. Une réduction de 15% a été appliquée.")
+                            ->body('Le travail du prestataire a été vérifié.')
                             ->success()
                             ->send();
                     }),

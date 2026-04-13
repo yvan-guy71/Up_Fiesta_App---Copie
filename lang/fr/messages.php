@@ -16,8 +16,8 @@ return [
     ],
     'home' => [
         'hero_title' => 'Tous vos besoins d\'événements et services en un clic',
-        'hero_subtitle' => 'La platefoqui réunit les meilleurs prestataires d\'événements et les professionnels du quotidien (Prestataires, menuisiers, Cuisiniers etc.).',
-        'search_placeholder' => 'Que recherchez-vous ? (Traiteur, Maçon, DJ...)',
+        'hero_subtitle' => 'La plateforme qui réunit les meilleurs prestataires d\'événements et les services professionnels (Traiteurs, Décorateurs, DJ, etc.).',
+        'search_placeholder' => 'Que recherchez-vous ? (Traiteur, DJ, Décorateur...)',
         'search_button' => 'Rechercher',
         'search_popular' => 'Populaire :',
         'featured_title' => 'Professionnels à la une',

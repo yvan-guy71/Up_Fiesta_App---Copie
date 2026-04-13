@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "744471895908",
+    "project_id": "upfiesta-6b611",
+    "storage_bucket": "upfiesta-6b611.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:744471895908:android:ad74ed273eaebc6d976471",
+        "android_client_info": {
+          "package_name": "com.example.up_fiesta_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAKfKkU3C_viP7YMqRYUAb7hZrXVMcDJI4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

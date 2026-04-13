@@ -462,14 +462,6 @@
                     </div>
                     
                     <div class="lg:w-48 relative flex items-center bg-white/10 px-4 py-2 rounded-xl border border-transparent focus-within:bg-white/20 focus-within:border-white/60 transition-all select-wrapper">
-                        <select id="select-kind" name="kind" class="search-select w-full h-full px-6 py-4 bg-white dark:bg-slate-800 border border-slate-200/50 dark:border-slate-700/50 rounded-[1.5rem] text-slate-900 dark:text-white focus:ring-4 focus:ring-indigo-500/10 transition-all font-bold appearance-none shadow-sm">
-                            <option value="" class="text-slate-700 dark:text-slate-400">Tous types</option>
-                            <option value="{{ \App\Models\ServiceCategory::KIND_PRESTATIONS }}" {{ request('kind') === \App\Models\ServiceCategory::KIND_PRESTATIONS ? 'selected' : '' }} class="text-slate-700 dark:text-slate-400">{{ __('messages.categories.kind_prestations') }}</option>
-                            <option value="{{ \App\Models\ServiceCategory::KIND_DOMESTIQUES }}" {{ request('kind') === \App\Models\ServiceCategory::KIND_DOMESTIQUES ? 'selected' : '' }} class="text-slate-700 dark:text-slate-400">{{ __('messages.categories.kind_domestiques') }}</option>
-                        </select>-
-                    </div>
-
-                    <div class="lg:w-48 relative flex items-center bg-white/10 px-4 py-2 rounded-xl border border-transparent focus-within:bg-white/20 focus-within:border-white/60 transition-all select-wrapper">
                         <select id="select-category" name="category" class="search-select  w-full h-full px-6 py-4 bg-white dark:bg-slate-800 border border-slate-200/50 dark:border-slate-700/50 rounded-[1.5rem] text-slate-900 dark:text-white focus:ring-4 focus:ring-indigo-500/10 transition-all font-bold appearance-none shadow-sm">
                             <option value="" class="text-slate-700 dark:text-slate-400">Toutes catégories</option>
                             @foreach($searchCategories as $category)
@@ -484,9 +476,11 @@
                         <select id="select-city" name="city" class="search-select  w-full h-full px-6 py-4 bg-white dark:bg-slate-800 border border-slate-200/50 dark:border-slate-700/50 rounded-[1.5rem] text-slate-900 dark:text-white focus:ring-4 focus:ring-indigo-500/10 transition-all font-bold appearance-none shadow-sm">
                             <option value="" class="text-slate-700 dark:text-slate-600 bg-slate-500">Toutes les villes</option>
                             @foreach($cities as $city)
-                                <option value="{{ $city->id }}" {{ request('city') == $city->id ? 'selected' : '' }} class="text-slate-700 dark:text-slate-400">
-                                    {{ $city->name }}
-                                </option>
+                                @if(Str::contains(Str::lower($city->name), 'lomé'))
+                                    <option value="{{ $city->id }}" {{ request('city') == $city->id ? 'selected' : '' }} class="text-slate-700 dark:text-slate-400">
+                                        {{ $city->name }}
+                                    </option>
+                                @endif
                             @endforeach
                         </select>
                     </div>
@@ -499,10 +493,7 @@
                 <!-- Suggestions de recherche -->
                 <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
                     <span class="text-indigo-100/80 text-sm font-bold uppercase tracking-wider mr-2">{{ __('messages.home.search_popular') }}</span>
-                    @php
-                        $suggestions = ['Traiteur', 'Menuisier', 'DJ', 'Plombier', 'Photographe'];
-                    @endphp
-                    @foreach($suggestions as $suggestion)
+                    @foreach(__('messages.home.suggestions') as $suggestion)
                         <button type="button" onclick="setSearchValue('{{ $suggestion }}')" class="bg-white/10 backdrop-blur-md border border-white/20 text-white px-4 py-1.5 rounded-full text-sm font-bold hover:bg-white hover:text-indigo-600 transition-all hover:-translate-y-1 shadow-sm">
                             {{ $suggestion }}
                         </button>
@@ -516,23 +507,6 @@
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-3xl font-bold">{{ __('messages.categories.browse_title') }}</h2>
                 <a href="{{ route('categories.index') }}" class="text-indigo-600 font-semibold hover:underline">{{ __('messages.categories.view_all') }}</a>
-            </div>
-            <!-- quick kind filters -->
-            <div class="flex gap-4 mb-8">
-                <a href="{{ route('home', array_merge(request()->except('kind'), ['kind' => \App\Models\ServiceCategory::KIND_PRESTATIONS])) }}#categories" class="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition">
-                    
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h3m10 0h3a1 1 0 011 1v3M3 16v3a1 1 0 001 1h3m10 0h3a1 1 0 001-1v-3" />
-                    </svg>
-                    {{ __('messages.categories.kind_prestations') }}
-                </a>
-                <a href="{{ route('home', array_merge(request()->except('kind'), ['kind' => \App\Models\ServiceCategory::KIND_DOMESTIQUES])) }}#categories" class="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition">
-                    
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 6h18M5 14h14l1 6H4l1-6z" />
-                    </svg>
-                    {{ __('messages.categories.kind_domestiques') }}
-                </a>
             </div>
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
              @foreach($homeCategories as $category)
@@ -549,34 +523,16 @@
                 'maquillage-coiffure' => 'images/categories/coiffure.jpg',
                 'location-voiture' => 'images/categories/voiture.jpeg',
                 'hotesse-accueil' => 'images/categories/hotesse.jpg',
-                
-                // Services Professionnels
-                'maconnerie' => 'images/categories/macon.webp',
-                'menuiserie' => 'images/categories/menuisier.jpg',
-                'cuisinier-domicile' => 'images/categories/cuisinier.webp',
-                'plomberie' => 'images/categories/plombier.jpg',
-                'electricite' => 'images/categories/electricien.webp',
-                'peinture' => 'images/categories/peintre.jpg',
-                'climatisation' => 'images/categories/clim.jpg',
-                'entretien-nettoyage' => 'images/categories/nettoyage.webp',
-                'mecanique' => 'images/categories/mecanique.jpeg',
-                'transport-logistique' => 'images/categories/transport.jpeg',
             ];
               $imagePath = $categoryImages[$category->slug] ?? 'images/categories/default.jpg';
              @endphp
             <div class="relative group rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition h-40 md:h-48 {{ $selected ? 'ring-4 ring-indigo-500' : '' }}">
                 <!-- full clickable area for category detail page -->
                 <a href="{{ route('search', ['category' => $category->id]) }}" class="absolute inset-0 z-20"></a>
-                <!-- quick type filter icon -->
-                <a href="{{ route('home', ['kind' => $category->kind]) }}#categories" class="absolute top-2 left-2 z-30 bg-white/70 p-1 rounded-full hover:bg-white transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h3m10 0h3a1 1 0 011 1v3M3 16v3a1 1 0 001 1h3m10 0h3a1 1 0 001-1v-3" />
-                    </svg>
-                </a>
                 <img src="{{ asset($imagePath) }}" alt="{{ $category->name }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                 <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-4 bg-black/40 text-white transition-opacity duration-300 z-10">
                     <h3 class="font-bold text-lg md:text-xl">{{ $category->name }}</h3>
-                    <p class="text-sm opacity-90 mt-1">{{ $category->providers_count }} professionnels disponibles</p>
+                    <p class="text-sm opacity-90 mt-1">{{ $category->providers_count }} {{ __('messages.search.count_multiple', ['count' => $category->providers_count]) }}</p>
                 </div>
             </div>
              @endforeach

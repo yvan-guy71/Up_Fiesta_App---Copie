@@ -35,20 +35,8 @@ class MessageController extends Controller
         $user = Auth::user();
         $contact = User::findOrFail($userId);
 
-        // ENFORCE STRICT ADMIN INTERMEDIARY: 
-        // - Clients can ONLY contact admin, NEVER providers (even after assignment)
-        // - Providers can ONLY contact admin, NEVER clients (even after assignment)
+        // Les clients et les prestataires peuvent maintenant discuter directement entre eux
         
-        if ($user->role === 'client' && $contact->role === 'provider') {
-            return redirect()->route('messages.index')
-                ->with('error', 'Vous pouvez exprimer vos besoins auprès de Up-fiesta. Up-fiesta se charge d\'assigner les prestataires.');
-        }
-
-        if ($user->role === 'provider' && $contact->role === 'client') {
-            return redirect()->route('messages.index')
-                ->with('error', 'Vous pouvez communiquer uniquement avec l\'administration de Up-fiesta.');
-        }
-
         $messages = Message::where(function($q) use ($user, $userId) {
                 $q->where('sender_id', $user->id)->where('receiver_id', $userId)->where('deleted_for_sender', false);
             })
@@ -85,18 +73,8 @@ class MessageController extends Controller
         $sender = Auth::user();
         $receiver = User::findOrFail($userId);
 
-        // ENFORCE STRICT ADMIN INTERMEDIARY:
-        // - Clients can ONLY contact admin, NEVER providers (even after assignment)
-        // - Providers can ONLY contact admin, NEVER clients (even after assignment)
+        // Les clients et les prestataires peuvent maintenant discuter directement entre eux
         
-        if ($sender->role === 'client' && $receiver->role === 'provider') {
-            return back()->with('error', 'Vous devez exprimer vos besoins auprès de Up-fiesta. Up-fiesta se charge d\'assigner les prestataires.');
-        }
-
-        if ($sender->role === 'provider' && $receiver->role === 'client') {
-            return back()->with('error', 'Vous pouvez communiquer uniquement avec l\'administration de Up-fiesta.');
-        }
-
         $request->validate([
             'content' => 'required_without:provider_id|nullable|string',
             'provider_id' => 'nullable|exists:providers,id',
@@ -161,3 +139,6 @@ class MessageController extends Controller
         return redirect()->route('messages.index')->with('success', 'Conversation masquée pour vous.');
     }
 }
+
+
+

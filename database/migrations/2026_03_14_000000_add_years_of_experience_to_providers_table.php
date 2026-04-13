@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('providers', function (Blueprint $table) {
-            $table->unsignedInteger('years_of_experience')->nullable()->default(0)->after('cni_number');
+            $table->unsignedInteger('years_of_experience')->nullable()->default(0);
         });
     }
 

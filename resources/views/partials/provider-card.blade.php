@@ -1,5 +1,15 @@
 <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-md hover:shadow-2xl hover:shadow-slate-300/50 dark:hover:shadow-slate-950/50 transition-all duration-300 transform hover:-translate-y-1 overflow-hidden flex flex-col h-full group">
     
+    <!-- Unverified Warning Banner -->
+    @unless($provider->is_verified)
+    <div class="bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800/50 px-4 py-2.5 flex items-center gap-2.5">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-600 dark:text-amber-500 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+        </svg>
+        <span class="text-xs font-semibold text-amber-700 dark:text-amber-200">Non vérifié</span>
+    </div>
+    @endunless
+    
     <!-- Image/Logo Section -->
     <div class="relative h-52 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-800 overflow-hidden">
         @if($provider->logo)
@@ -38,11 +48,7 @@
         <div class="flex items-center justify-between gap-3 mb-3">
             <div class="flex items-center gap-2">
                 <span class="inline-block px-3 py-1 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 rounded-full text-xs font-semibold tracking-wide">
-                    @if($provider->categories->isNotEmpty())
-                        {{ $provider->categories->first()->name }}
-                    @else
-                        {{ $provider->category->name ?? 'Services' }}
-                    @endif
+                    {{ $provider->category->name ?? 'Services' }}
                 </span>
             </div>
             <div class="flex items-center gap-1 text-slate-600 dark:text-slate-400 text-xs font-medium">
@@ -62,7 +68,7 @@
                 <span class="text-2xl font-black text-indigo-600 dark:text-indigo-400">
                     {{ number_format($provider->base_price, 0, ',', ' ') }}
                 </span>
-                <span class="text-xs text-slate-500 dark:text-slate-400 font-semibold">XOF/mission</span>
+                <span class="text-xs text-slate-700 dark:text-slate-400 font-semibold">XOF/mission</span>
             </div>
         </div>
         
@@ -94,7 +100,7 @@
 
         <!-- Action Buttons -->
         <div class="flex items-center gap-2 pt-4 border-t border-slate-200 dark:border-slate-700">
-            <button onclick="openBookingModal({{ $provider->id }}, '{{ addslashes($provider->name) }})" 
+            <button onclick="openBookingModal({{ $provider->id }}, '{{ addslashes($provider->name) }}')" 
                 class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold rounded-lg transition-all duration-300 shadow-sm hover:shadow-lg active:scale-95"
                 title="Réserver ce prestataire">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -103,15 +109,9 @@
                 <span class="text-sm">Réserver</span>
             </button>
 
-            @php
-                $contactUrl = route('login');
-                if (auth()->check()) {
-                    $contactUrl = route('messages.show', ['user' => 1, 'needs_provider' => $provider->id]);
-                }
-            @endphp
-            <a href="{{ $contactUrl }}" 
+            <a href="{{ auth()->check() ? route('messages.show', ['user' => $provider->user_id]) : route('login') }}" 
                 class="p-2.5 text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded-lg transition-all duration-300 ring-2 ring-transparent hover:ring-indigo-200 dark:hover:ring-indigo-800"
-                title="Exprimer mes besoins">
+                title="Contacter le prestataire directement">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                 </svg>

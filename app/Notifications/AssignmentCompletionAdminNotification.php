@@ -63,7 +63,10 @@ class AssignmentCompletionAdminNotification extends Notification implements Shou
             'service_request_id' => $this->assignedService->service_request_id,
             'provider_id' => $this->assignedService->provider_id,
             'message' => 'Le prestataire ' . $this->assignedService->provider->name . ' a signalé la finalisation du service "' . $this->assignedService->serviceRequest->subject . '".',
-            'action_url' => '/up-fiesta-kygj/assigned-services/' . $this->assignedService->id,
+            'action_url' => '/Upfiesta-kygj/assigned-services/' . $this->assignedService->id,
         ];
     }
 }
+
+
+

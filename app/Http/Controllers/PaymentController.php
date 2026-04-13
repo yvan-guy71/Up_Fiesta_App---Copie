@@ -67,11 +67,13 @@ class PaymentController extends Controller
         }
 
         if (PaymentService::verifyPayment($transactionId)) {
+            // Paiement reçu sur le compte UpFiesta - 100% pour le prestataire (plateforme gratuite)
             $total = $booking->total_price;
-            $commissionRate = 0.15;
-            $platformFee = round($total * $commissionRate, 2);
-            $providerAmount = max($total - $platformFee, 0);
+            $commissionRate = 0; // Plateforme 100% gratuite pour les prestataires
+            $platformFee = 0;
+            $providerAmount = $total; // 100% pour le prestataire
 
+            // 100% pour le prestataire (UpFiesta est gratuit)
             $booking->update([
                 'payment_status' => 'paid',
                 'transaction_id' => $transactionId,
